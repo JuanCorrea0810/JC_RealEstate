@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace RealEstate.Utilities
 {
-    public class GetUserInfo 
+    public class GetUserInfo : IGetUserInfo
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly UserManager<NewIdentityUser> userManager;

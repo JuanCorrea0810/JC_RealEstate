@@ -18,10 +18,10 @@ namespace RealEstate.Controllers
     {
             private readonly RealEstateProjectContext context;
             private readonly IMapper mapper;
-            private readonly GetUserInfo getUser;
+            private readonly IGetUserInfo getUser;
 
         public EstatesController(RealEstateProjectContext context, IMapper mapper,
-            GetUserInfo getUser)
+            IGetUserInfo getUser)
         {
             this.context = context;
             this.mapper = mapper; 

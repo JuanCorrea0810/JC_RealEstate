@@ -104,7 +104,7 @@ namespace RealEstate
 
             services.AddScoped<TokenAuthSignUp>();
             services.AddScoped<TokenAuthLogIn>();
-            services.AddTransient<GetUserInfo>();
+            services.AddTransient<IGetUserInfo,GetUserInfo>();
             services.AddScoped<IEmailSender, MailJetEmailSender>();
             
         }

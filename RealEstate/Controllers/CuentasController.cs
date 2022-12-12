@@ -26,7 +26,7 @@ namespace RealEstate.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly TokenAuthLogIn authgLogIn;
         private readonly TokenAuthSignUp authSignUp;
-        private readonly GetUserInfo getUserInfo;
+        private readonly IGetUserInfo getUserInfo;
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
 
@@ -36,7 +36,7 @@ namespace RealEstate.Controllers
             RoleManager<IdentityRole> roleManager,
             TokenAuthLogIn AuthgLogIn,
             TokenAuthSignUp AuthSignUp,
-            GetUserInfo getUserInfo,
+            IGetUserInfo getUserInfo,
             IMapper mapper,
             IEmailSender emailSender
             

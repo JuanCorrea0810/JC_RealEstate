@@ -10,5 +10,6 @@ namespace RealEstateTests.PruebasUnitarias
     [TestClass]
     public class EstatesControllerTests:BasePruebas
     {
+
     }
 }
