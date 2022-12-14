@@ -30,7 +30,7 @@ namespace RealEstate.Controllers
 
         [AllowAnonymous]
         [HttpGet("ListOfEstates")]
-        public async Task<ActionResult<List<GetEstatesDTO>>> GetAllEstates() 
+        public async Task<ActionResult<List<GetEstatesDTO>>> GetAllEstates()
         {
             var Estates = await context.Estates.ToListAsync();
             return mapper.Map<List<GetEstatesDTO>>(Estates);
@@ -74,12 +74,12 @@ namespace RealEstate.Controllers
             {
                 return NotFound($"El usuario no ha registrado ninguna propiedad con el Alias: {Alias}");
             }
-            var AliasArray = db.ToCharArray();
-            var Char = Alias.ToCharArray();
+            var AliasDB = db.ToCharArray();
+            var AliasChar = Alias.ToCharArray();
 
-            if (Char.Length != AliasArray.Length)
+            if (AliasChar.Length != AliasDB.Length)
             {
-                return BadRequest($"Ninguna de sus propiedades tiene el Alias: {Alias} , por favor revise que la información sea correcta.");
+                return NotFound($"Ninguna de sus propiedades tiene el Alias: {Alias} , por favor revise que la información sea correcta.");
             }
             var Result = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(Alias) && x.IdUser == IdUser);
 
@@ -94,13 +94,13 @@ namespace RealEstate.Controllers
 
             var IdUser = await getUser.GetId();
 
-            var Alias = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(postEstateDto.Alias) && x.IdUser == IdUser);
-            if (Alias != null)
+            var User = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(postEstateDto.Alias) && x.IdUser == IdUser);
+            if (User != null)
             {
-                var CharAlias = Alias.Alias.ToCharArray();
+                var AliasDB = User.Alias.ToCharArray();
                 var SameAlias = postEstateDto.Alias.ToCharArray();
 
-                if (SameAlias.Length == CharAlias.Length)
+                if (SameAlias.Length == AliasDB.Length)
                 {
                     return BadRequest($"El usuario ya registró una propiedad previamente con el alias : {postEstateDto.Alias}");
                 }
@@ -145,22 +145,25 @@ namespace RealEstate.Controllers
             {
                 return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
             }
+            var CampoActualizar = jsonPatchDocument.Operations[0].path == "/Alias";
+            var Operacion = jsonPatchDocument.Operations[0].op == "replace";
+            var Valor = jsonPatchDocument.Operations[0].value.ToString();
 
-            //Saber si el usuario quiere actualizar el campos "Alias" y verificar que no repita nombre
-            if (jsonPatchDocument.Operations[0].path == "/Alias" && jsonPatchDocument.Operations[0].op == "replace")
+            //Saber si el usuario quiere actualizar es el campo "Alias" y verificar que no se repita 
+            if (CampoActualizar && Operacion)
             {
 
-                var Alias = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(jsonPatchDocument.Operations[0].value.ToString()) && x.IdUser == IdUser);
+                var Entidad = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(Valor) && x.IdUser == IdUser);
 
 
-                if (Alias != null)
+                if (Entidad != null)
                 {
-                    var CharAlias = Alias.Alias.ToCharArray();
-                    var SameAlias = jsonPatchDocument.Operations[0].value.ToString().ToCharArray();
+                    var AliasDB = Entidad.Alias.ToCharArray();
+                    var SameAlias = Valor.ToCharArray();
 
-                    if (SameAlias.Length == CharAlias.Length)
+                    if (SameAlias.Length == AliasDB.Length)
                     {
-                        return BadRequest($"El usuario ya registró una propiedad previamente con el alias : {jsonPatchDocument.Operations[0].value.ToString()}");
+                        return BadRequest($"El usuario ya registró una propiedad previamente con el alias : {Valor}");
                     }
                 }
 
