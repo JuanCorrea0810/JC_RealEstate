@@ -44,6 +44,27 @@ namespace PeliculasAPI.Tests
 
             return config.CreateMapper();
         }
+
+        /*Método que sirve para todos los controladores. En donde cada acción de cada controlador se busca saber si la propiedad existe en primer lugar.
+         siempre va antes de realizar cualquier otro paso. Ya que si no existe propiedad no se puede hacer nada con los demás controladores.*/
+        protected async Task<bool> ExistePropiedad(int IdEstate,string IdUser, string nombreDB) 
+        {
+            var context = ConstruirContext(nombreDB);
+            var mapper = ConfigurarAutoMapper();
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult($"{IdUser}"));
+            var controller = new EstatesController(context, mapper, mock.Object);
+
+            var resultado = await controller.GetById(IdEstate);
+            if (resultado.Value != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        
+
         //private UserManager<TUser> BuildUserManager<TUser>(IUserStore<TUser> store = null) where TUser : class
         //{
         //    store = store ?? new Mock<IUserStore<TUser>>().Object;

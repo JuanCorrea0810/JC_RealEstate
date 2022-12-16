@@ -206,7 +206,6 @@ namespace RealEstateTests.PruebasUnitarias
             Assert.IsNotNull(codigo);
             Assert.AreEqual(404,codigo.StatusCode);
             Assert.AreEqual(1,mock.Invocations.Count);
-
         }
         [TestMethod]
         public async Task DevuelvePropiedadPorId()
