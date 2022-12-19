@@ -8,12 +8,12 @@ namespace RealEstate.DTO_s.EstatesDTO_s
     {
         
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
-        public string Address { get; set; } = null!;
+        public string Address { get; set; }
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
         [CountryValidation]
-        public string Country { get; set; } = null!;
+        public string Country { get; set; } 
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
-        public string City { get; set; } = null!;
+        public string City { get; set; }
 
         public int Rooms { get; set; }
         public int KmsGround { get; set; }

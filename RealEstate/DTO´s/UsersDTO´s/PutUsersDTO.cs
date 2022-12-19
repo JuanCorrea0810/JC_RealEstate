@@ -9,26 +9,26 @@ namespace RealEstate.DTO_s.UsersDTO_s
         public long Dni { get; set; }
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
         [Required]
-        public string FirstName { get; set; } = null!;
+        public string FirstName { get; set; }
 
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
         public string SecondName { get; set; }
 
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
         [Required]
-        public string FirstSurName { get; set; } = null!;
+        public string FirstSurName { get; set; } 
 
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
-        public string SecondSurName { get; set; } = null!;
+        public string SecondSurName { get; set; } 
 
         [Required]
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
         [CountryValidation]
-        public string Country { get; set; } = null!;
+        public string Country { get; set; } 
 
         [StringLength(250, ErrorMessage = "El campo {0}, no puede tener más de {1} caracteres")]
 
-        public string Address { get; set; } = null!;
+        public string Address { get; set; }
 
         [Range(1, 130, ErrorMessage = "Se debe ingresar un valor entre {1} y {2}")]
         public int Age { get; set; }

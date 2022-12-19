@@ -145,12 +145,12 @@ namespace RealEstate.Controllers
             {
                 return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
             }
-            var CampoActualizar = jsonPatchDocument.Operations[0].path == "/Alias";
-            var Operacion = jsonPatchDocument.Operations[0].op == "replace";
+            var CampoActualizar = jsonPatchDocument.Operations[0].path;
+            var Operacion = jsonPatchDocument.Operations[0].op; 
             var Valor = jsonPatchDocument.Operations[0].value.ToString();
 
             //Saber si el usuario quiere actualizar es el campo "Alias" y verificar que no se repita 
-            if (CampoActualizar && Operacion)
+            if (CampoActualizar == "/Alias" && Operacion == "replace")
             {
 
                 var Entidad = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(Valor) && x.IdUser == IdUser);

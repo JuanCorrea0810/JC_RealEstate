@@ -44,7 +44,7 @@ namespace RealEstate.Controllers
             return mapper.Map<List<GetRentersDTO>>(Renters);
         }
         [HttpGet]
-        public async Task<ActionResult<List<GetRentersDTO>>> Get(int IdEstate)
+        public async Task<ActionResult<List<GetRentersDTO>>> GetRentersOfEstate(int IdEstate)
         {
             var IdUser = await getUser.GetId();
             var Estates = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
@@ -113,9 +113,14 @@ namespace RealEstate.Controllers
             _Renter.IdEstate = IdEstate;
             context.Add(_Renter);
             await context.SaveChangesAsync();
-            string query = $"update Renter set Active = 0 where Id_Estate = {_Renter.IdEstate} AND Id_Renter != {_Renter.IdRenter}";
-            await context.Database.ExecuteSqlRawAsync(query);
 
+            /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
+            pasarán a estar inactivos automáticamente*/
+            var Renters = context.Renters.Where(x => x.IdEstate == _Renter.IdEstate).AsQueryable();
+            var PreviousRenters = Renters.Where(x => x.IdRenter != _Renter.IdRenter).ToList();
+            PreviousRenters.ForEach(x => x.Active = false);
+            await context.SaveChangesAsync();
+         
             var RenterDTO = mapper.Map<GetRentersDTO>(_Renter);
             return CreatedAtRoute("GetRenter", new { IdEstate = IdEstate, Id = _Renter.IdRenter }, RenterDTO);
         }
@@ -165,11 +170,17 @@ namespace RealEstate.Controllers
             {
                 return NotFound("No existe el Renter o la propiedad no le pertenece");
             }
+            var CampoActualizar = jsonPatchDocument.Operations[0].path;
+            var Valor = jsonPatchDocument.Operations[0].value.ToString();
 
-            if (jsonPatchDocument.Operations[0].path == "/Active" && jsonPatchDocument.Operations[0].value.ToString() == "true")
+            if (CampoActualizar == "/Active" && Valor == "true")
             {
-                string query = $"update Renter set Active = 0 where Id_Estate = {IdEstate} AND Id_Renter != {IdRenter}";
-                await context.Database.ExecuteSqlRawAsync(query);
+                /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
+            pasarán a estar inactivos automáticamente*/
+                var Renters = context.Renters.Where(x => x.IdEstate == Renter.IdEstate).AsQueryable();
+                var PreviousRenters = Renters.Where(x => x.IdRenter != Renter.IdRenter).ToList();
+                PreviousRenters.ForEach(x => x.Active = false);
+                await context.SaveChangesAsync();
             }
 
             var RenterDTO = mapper.Map<PatchRentersDTO>(Renter);

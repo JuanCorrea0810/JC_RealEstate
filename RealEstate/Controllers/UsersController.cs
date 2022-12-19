@@ -35,7 +35,7 @@ namespace RealEstate.Controllers
         }
 
         [HttpGet("GetUsers")]
-        //Get All the users but using pagination to improve the performance
+        //GetRentersOfEstate All the users but using pagination to improve the performance
         public async Task<ActionResult<List<GetUsersDTO>>> GetUsers([FromQuery]PaginacionDTO paginacionDTO) 
         {
             var Query = userManager.Users.AsQueryable();
