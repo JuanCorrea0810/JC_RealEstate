@@ -8,6 +8,7 @@ using RealEstate.Utilities;
 
 namespace RealEstate.Controllers
 {
+    
     public class CustomBaseController : ControllerBase
     {
         private readonly RealEstateProjectContext context;
@@ -29,7 +30,7 @@ namespace RealEstate.Controllers
             }
             return mapper.Map<List<GetEstatesDTO>>(Estates);
         }
-
+       
         public async Task<ActionResult<GetEstatesDTO>> DevolverPropiedad(string IdUser, int IdEstate)
         {
             var Estate = await context.Estates.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
@@ -44,6 +45,7 @@ namespace RealEstate.Controllers
             
             return mapper.Map<GetEstatesDTO>(Estate);
         }
+        
         public async Task<ActionResult<bool>> SaberSiExistePropiedad(string IdUser, int IdEstate)
         {
             var ExisteEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
@@ -53,6 +55,7 @@ namespace RealEstate.Controllers
             }
             return ExisteEstate;
         }
+        
         public async Task<ActionResult<bool>> SaberSiExisteRenter(int IdRenter)
         {
             var Renter = await context.Renters.AnyAsync(x => x.IdRenter == IdRenter);

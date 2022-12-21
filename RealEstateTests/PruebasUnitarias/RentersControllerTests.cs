@@ -194,32 +194,25 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new RentersController(context2, mapper, mock.Object);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                //Prueba
-                var resultado = await controller.GetRentersOfEstate(1);
+            //Prueba
+            var resultado = await controller.GetRentersOfEstate(1);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -276,30 +269,23 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new RentersController(context2, mapper, mock.Object);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                //Prueba
-                var resultado = await controller.GetRentersOfEstate(1);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                //Verificación
-                var respuesta = resultado.Value;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(2,respuesta.Count);
-                Assert.AreEqual(1234567890, respuesta[0].Dni);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.GetRentersOfEstate(1);
+
+            //Verificación
+            var respuesta = resultado.Value;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(2, respuesta.Count);
+            Assert.AreEqual(1234567890, respuesta[0].Dni);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -356,30 +342,22 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new RentersController(context2, mapper, mock.Object);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                //Prueba
-                var resultado = await controller.GetById(1, 1);
+            //Prueba
+            var resultado = await controller.GetById(1, 1);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -442,44 +420,36 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var dto = new PostRentersDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                Active = true
+            };
+            var context2 = ConstruirContext(nombreDB);
 
-                var dto = new PostRentersDTO()
-                {
-                    Dni = 1234567890,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas",
-                    Active = true
-                };
-                var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Post(1, dto);
 
-                //Prueba
-                var resultado = await controller.Post(1, dto);
+            //Verificación
+            var respuesta = resultado as BadRequestObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(400, respuesta.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as BadRequestObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(400, respuesta.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
 
         [TestMethod]
@@ -520,47 +490,40 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var dto = new PostRentersDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 0987654321,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                Active = true
+            };
+            var context2 = ConstruirContext(nombreDB);
 
-                var dto = new PostRentersDTO()
-                {
-                    Dni = 0987654321,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas",
-                    Active = true
-                };
-                var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Post(1, dto);
 
-                //Prueba
-                var resultado = await controller.Post(1, dto);
+            //Verificación
+            var respuesta = resultado as BadRequestObjectResult;
+            var context3 = ConstruirContext(nombreDB);
+            var CantidadRenters = await context3.Renters.CountAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(1, CantidadRenters);
+            Assert.AreEqual(400, respuesta.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as BadRequestObjectResult;
-                var context3 = ConstruirContext(nombreDB);
-                var CantidadRenters = await context3.Renters.CountAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(1,CantidadRenters);
-                Assert.AreEqual(400, respuesta.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
         [TestMethod]
         public async Task SiSePuedeRegistrarDosRentersConElMismoDniADiferentesPropiedadesYMarcaComoInactivosLosAnterioresRenters()
@@ -631,47 +594,40 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var dto = new PostRentersDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                Active = true
+            };
+            var context2 = ConstruirContext(nombreDB);
 
-                var dto = new PostRentersDTO()
-                {
-                    Dni = 1234567890,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas",
-                    Active = true
-                };
-                var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Post(1, dto);
 
-                //Prueba
-                var resultado = await controller.Post(1, dto);
+            //Verificación
+            var respuesta = resultado as CreatedAtRouteResult;
+            var context3 = ConstruirContext(nombreDB);
+            var Renters = await context3.Renters.ToListAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(3, Renters.Count);
+            Assert.AreNotEqual(Renters[0].Active, Renters[2].Active);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as CreatedAtRouteResult;
-                var context3 = ConstruirContext(nombreDB);
-                var Renters = await context3.Renters.ToListAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(3, Renters.Count);
-                Assert.AreNotEqual(Renters[0].Active, Renters[2].Active);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
         [TestMethod]
         public async Task SeRegistraNuevoRenter()
@@ -694,52 +650,45 @@ namespace RealEstateTests.PruebasUnitarias
                 Rented = false,
                 Sold = false
             });
-            
+
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var dto = new PostRentersDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                Active = true
+            };
+            var context2 = ConstruirContext(nombreDB);
 
-                var dto = new PostRentersDTO()
-                {
-                    Dni = 1234567890,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas",
-                    Active = true
-                };
-                var context2 = ConstruirContext(nombreDB);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Post(1, dto);
 
-                //Prueba
-                var resultado = await controller.Post(1, dto);
+            //Verificación
+            var respuesta = resultado as CreatedAtRouteResult;
+            var context3 = ConstruirContext(nombreDB);
+            var ExisteRenter = await context3.Renters.AnyAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.IsTrue(ExisteRenter);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as CreatedAtRouteResult;
-                var context3 = ConstruirContext(nombreDB);
-                var ExisteRenter = await context3.Renters.AnyAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.IsTrue(ExisteRenter);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
 
-      
+
         [TestMethod]
         public async Task SeBorraElRenter()
         {
@@ -779,31 +728,22 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var controller = new RentersController(context2, mapper, mock.Object);
-                //Prueba
-                var resultado = await controller.Delete(1,1);
+            var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Delete(1, 1);
 
-                //Verificación
-                var respuesta = resultado as OkObjectResult;
-                var context3 = ConstruirContext(nombreDB);
-                var ExisteRenter = await context3.Renters.AnyAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.IsFalse(ExisteRenter);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado as OkObjectResult;
+            var context3 = ConstruirContext(nombreDB);
+            var ExisteRenter = await context3.Renters.AnyAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.IsFalse(ExisteRenter);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
         [TestMethod]
         public async Task NoSePuedeBorrarRenterQueNoExisteOLaPropiedadNoEsVálida()
@@ -844,27 +784,19 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var controller = new RentersController(context2, mapper, mock.Object);
-                //Prueba
-                var resultado = await controller.Delete(1,1);
+            var controller = new RentersController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Delete(1, 1);
 
-                //Verificación
-                var respuesta = resultado as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
         [TestMethod]
         public async Task NoSePuedeActualizarPatchARenterQueNoExiste()
@@ -889,28 +821,20 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-                var controller = new RentersController(context2, mapper, mock.Object);
-                var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
-                jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/SecondName", null, "Juan"));
-                //Prueba
-                var resultado = await controller.Patch(jsonPatch, 1,1);
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var controller = new RentersController(context2, mapper, mock.Object);
+            var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
+            jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/SecondName", null, "Juan"));
+            //Prueba
+            var resultado = await controller.Patch(jsonPatch, 1, 1);
 
-                //Verificación
-                var respuesta = resultado as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -951,42 +875,34 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                var objectValidator = new Mock<IObjectModelValidator>();
-                objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
+            var objectValidator = new Mock<IObjectModelValidator>();
+            objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
+                It.IsAny<ValidationStateDictionary>(),
+                It.IsAny<string>(),
+                It.IsAny<object>()));
 
-                controller.ObjectValidator = objectValidator.Object;
-                var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
-                jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/SecondName", null, "Pablo"));
+            controller.ObjectValidator = objectValidator.Object;
+            var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
+            jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/SecondName", null, "Pablo"));
 
-                //Prueba
-                var resultado = await controller.Patch(jsonPatch, 1,1);
+            //Prueba
+            var resultado = await controller.Patch(jsonPatch, 1, 1);
 
-                //Verificación
-                var respuesta = resultado as NoContentResult;
-                var context3 = ConstruirContext(nombreDB);
-                var RenterActualizado = await context3.Renters.FirstAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual("Colombia",RenterActualizado.Country);
-                Assert.AreEqual("Pablo", RenterActualizado.SecondName);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado as NoContentResult;
+            var context3 = ConstruirContext(nombreDB);
+            var RenterActualizado = await context3.Renters.FirstAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual("Colombia", RenterActualizado.Country);
+            Assert.AreEqual("Pablo", RenterActualizado.SecondName);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
         [TestMethod]
         public async Task PatchMarcaComoInactivosAntiguosRenters()
@@ -1041,7 +957,7 @@ namespace RealEstateTests.PruebasUnitarias
                 IdEstate = 1,
                 Active = true
 
-            }); 
+            });
             context.Renters.Add(new Renter
             {
                 Dni = 1234567892,
@@ -1060,41 +976,34 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var controller = new RentersController(context2, mapper, mock.Object);
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var objectValidator = new Mock<IObjectModelValidator>();
-                objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
+            var controller = new RentersController(context2, mapper, mock.Object);
 
-                controller.ObjectValidator = objectValidator.Object;
-                var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
-                jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/Active", null, "true"));
+            var objectValidator = new Mock<IObjectModelValidator>();
+            objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
+                It.IsAny<ValidationStateDictionary>(),
+                It.IsAny<string>(),
+                It.IsAny<object>()));
 
-                //Prueba
-                var resultado = await controller.Patch(jsonPatch, 1, 3);
+            controller.ObjectValidator = objectValidator.Object;
+            var jsonPatch = new JsonPatchDocument<PatchRentersDTO>();
+            jsonPatch.Operations.Add(new Operation<PatchRentersDTO>("replace", "/Active", null, "true"));
 
-                //Verificación
-                var respuesta = resultado as NoContentResult;
-                var context3 = ConstruirContext(nombreDB);
-                var RenterActualizado = await context3.Renters.ToListAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreNotEqual(RenterActualizado[2].Active, RenterActualizado[0].Active);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.Patch(jsonPatch, 1, 3);
+
+            //Verificación
+            var respuesta = resultado as NoContentResult;
+            var context3 = ConstruirContext(nombreDB);
+            var RenterActualizado = await context3.Renters.ToListAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreNotEqual(RenterActualizado[2].Active, RenterActualizado[0].Active);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
     }
 }

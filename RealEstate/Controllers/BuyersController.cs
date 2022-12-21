@@ -13,14 +13,14 @@ namespace RealEstate.Controllers
     [ApiController]
     [Route("api/Estates/{IdEstate:int}/Buyer")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class BuyersController: CustomBaseController
+    public class BuyersController : CustomBaseController
     {
         private readonly RealEstateProjectContext context;
         private readonly IMapper mapper;
         private readonly IGetUserInfo getUser;
 
         public BuyersController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -52,19 +52,19 @@ namespace RealEstate.Controllers
         public async Task<ActionResult<GetBuyersDTO>> GetById([FromRoute] int IdEstate)
         {
             var IdUser = await getUser.GetId();
-            var ExisteEstate = await SaberSiExistePropiedad(IdUser,IdEstate);
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
             if (ExisteEstate.Value)
             {
-                var EstatesInBuyers = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
-                if (EstatesInBuyers == null)
+                var Buyer = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
+                if (Buyer == null)
                 {
                     return NotFound("La propiedad no ha sido comprada aún");
                 }
-                return mapper.Map<GetBuyersDTO>(EstatesInBuyers);
+                return mapper.Map<GetBuyersDTO>(Buyer);
 
             }
             return ExisteEstate.Result;
-            
+
         }
 
 
@@ -92,7 +92,7 @@ namespace RealEstate.Controllers
                 return CreatedAtRoute("GetBuyer", new { IdEstate = IdEstate }, BuyerDTO);
             }
             return ExisteEstate.Result;
-            
+
         }
 
 
@@ -113,7 +113,7 @@ namespace RealEstate.Controllers
                 return Ok("Comprador eliminado");
             }
             return ExisteEstate.Result;
-                
+
         }
 
         [HttpPatch]

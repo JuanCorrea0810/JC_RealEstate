@@ -19,7 +19,7 @@ using RealEstate.DTO_s.GuarantorDTO_s;
 namespace RealEstateTests.PruebasUnitarias
 {
     [TestClass]
-    public class GuarantosControllerTests: BasePruebas
+    public class GuarantosControllerTests : BasePruebas
     {
         [TestMethod]
         public async Task DevuelveLosGuarantorsDelUsuario()
@@ -269,32 +269,25 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
 
-                //Prueba
-                var resultado = await controller.GetGuarantorsOfRenter(1,1);
+            //Prueba
+            var resultado = await controller.GetGuarantorsOfRenter(1, 1);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -318,34 +311,27 @@ namespace RealEstateTests.PruebasUnitarias
                 Rooms = 12,
                 Rented = false,
                 Sold = false
-            }); 
+            });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                //Prueba
-                var resultado = await controller.GetGuarantorsOfRenter(1,1);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.GetGuarantorsOfRenter(1, 1);
+
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
         [TestMethod]
         public async Task DevuelveErrorSiPropiedadYRenterNoCoinciden()
@@ -386,31 +372,24 @@ namespace RealEstateTests.PruebasUnitarias
             });
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                //Prueba
-                var resultado = await controller.GetGuarantorsOfRenter(1, 1);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.GetGuarantorsOfRenter(1, 1);
+
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -468,30 +447,23 @@ namespace RealEstateTests.PruebasUnitarias
 
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                //Prueba
-                var resultado = await controller.GetById(1, 1, 1);
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
 
-                //Verificación
-                var respuesta = resultado.Result;
-                var codigo = respuesta as NotFoundObjectResult;
-                Assert.IsNotNull(codigo);
-                Assert.AreEqual(404, codigo.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.GetById(1, 1, 1);
+
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -543,47 +515,41 @@ namespace RealEstateTests.PruebasUnitarias
                 FirstSurName = "dsadadsas",
                 SecondName = "dsadasdasd",
                 SecondSurName = "dsadsdas",
-                IdRenter =1,
+                IdRenter = 1,
                 IdGuarantor = 1
             });
 
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
+            var dto = new PostGuarantorDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas"
+            };
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
-                var dto = new PostGuarantorDTO() {
-                    Dni = 1234567890,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas" 
-                };
+            //Prueba
+            var resultado = await controller.Post(dto, 1, 1);
 
-                //Prueba
-                var resultado = await controller.Post(dto, 1, 1);
+            //Verificación
+            var respuesta = resultado as BadRequestObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(400, respuesta.StatusCode);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as BadRequestObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(400, respuesta.StatusCode);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
         [TestMethod]
         public async Task SiSePuedeCrearGuarantorConElMismoDniAUnDiferenteRenter()
@@ -640,46 +606,39 @@ namespace RealEstateTests.PruebasUnitarias
 
 
             await context.SaveChangesAsync();
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
+
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            var context2 = ConstruirContext(nombreDB);
+            var controller = new GuarantorController(context2, mapper, mock.Object);
+            var dto = new PostGuarantorDTO()
             {
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas"
+            };
 
-                var context2 = ConstruirContext(nombreDB);
-                var controller = new GuarantorController(context2, mapper, mock.Object);
-                var dto = new PostGuarantorDTO()
-                {
-                    Dni = 1234567890,
-                    Address = "dsadasds",
-                    Age = 19,
-                    Email = "dsadsad@gmail.com",
-                    Country = "Colombia",
-                    CellPhoneNumber = 4528065891,
-                    FirsName = "dsads",
-                    FirstSurName = "dsadadsas",
-                    SecondName = "dsadasdasd",
-                    SecondSurName = "dsadsdas"
-                };
+            //Prueba
+            var resultado = await controller.Post(dto, 2, 1);
 
-                //Prueba
-                var resultado = await controller.Post(dto, 2, 1);
+            //Verificación
+            var respuesta = resultado as CreatedAtRouteResult;
+            var context3 = ConstruirContext(nombreDB);
+            var Guarantors = await context3.Guarantors.ToListAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(2, Guarantors.Count);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as CreatedAtRouteResult;
-                var context3 = ConstruirContext(nombreDB);
-                var Guarantors = await context3.Guarantors.ToListAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(2,Guarantors.Count);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
-        
+
         [TestMethod]
         public async Task SeBorraElGuarantor()
         {
@@ -734,33 +693,24 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var controller = new GuarantorController(context2, mapper, mock.Object);
+            //Prueba
+            var resultado = await controller.Delete(1, 1, 1);
 
-                var controller = new GuarantorController(context2, mapper, mock.Object);
-                //Prueba
-                var resultado = await controller.Delete(1,1, 1);
+            //Verificación
+            var respuesta = resultado as OkObjectResult;
+            var context3 = ConstruirContext(nombreDB);
+            var ExisteGuarantor = await context3.Guarantors.AnyAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.IsFalse(ExisteGuarantor);
+            Assert.AreEqual(1, mock.Invocations.Count);
 
-                //Verificación
-                var respuesta = resultado as OkObjectResult;
-                var context3 = ConstruirContext(nombreDB);
-                var ExisteGuarantor = await context3.Guarantors.AnyAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.IsFalse(ExisteGuarantor);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
         }
-        
+
         [TestMethod]
         public async Task NoSePuedeActualizarPatchAGuarantorQueNoExiste()
         {
@@ -800,28 +750,20 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-                var controller = new GuarantorController(context2, mapper, mock.Object);
-                var jsonPatch = new JsonPatchDocument<PatchGuarantorsDTO>();
-                jsonPatch.Operations.Add(new Operation<PatchGuarantorsDTO>("replace", "/SecondName", null, "Juan"));
-                //Prueba
-                var resultado = await controller.Patch(jsonPatch, 1, 1,1);
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+            var controller = new GuarantorController(context2, mapper, mock.Object);
+            var jsonPatch = new JsonPatchDocument<PatchGuarantorsDTO>();
+            jsonPatch.Operations.Add(new Operation<PatchGuarantorsDTO>("replace", "/SecondName", null, "Juan"));
+            //Prueba
+            var resultado = await controller.Patch(jsonPatch, 1, 1, 1);
 
-                //Verificación
-                var respuesta = resultado as NotFoundObjectResult;
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Verificación
+            var respuesta = resultado as NotFoundObjectResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
 
         [TestMethod]
@@ -877,44 +819,37 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var ExisteEstate = await ExistePropiedad(1, "Usuario1", nombreDB);
-            if (ExisteEstate)
-            {
-                var context2 = ConstruirContext(nombreDB);
-                var mock = new Mock<IGetUserInfo>();
-                mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var controller = new GuarantorController(context2, mapper, mock.Object);
+            var context2 = ConstruirContext(nombreDB);
+            var mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
 
-                var objectValidator = new Mock<IObjectModelValidator>();
-                objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
-                    It.IsAny<ValidationStateDictionary>(),
-                    It.IsAny<string>(),
-                    It.IsAny<object>()));
+            var controller = new GuarantorController(context2, mapper, mock.Object);
 
-                controller.ObjectValidator = objectValidator.Object;
-                var jsonPatch = new JsonPatchDocument<PatchGuarantorsDTO>();
-                jsonPatch.Operations.Add(new Operation<PatchGuarantorsDTO>("replace", "/SecondName", null, "Pablo"));
+            var objectValidator = new Mock<IObjectModelValidator>();
+            objectValidator.Setup(x => x.Validate(It.IsAny<ActionContext>(),
+                It.IsAny<ValidationStateDictionary>(),
+                It.IsAny<string>(),
+                It.IsAny<object>()));
 
-                //Prueba
-                var resultado = await controller.Patch(jsonPatch, 1, 1,1);
+            controller.ObjectValidator = objectValidator.Object;
+            var jsonPatch = new JsonPatchDocument<PatchGuarantorsDTO>();
+            jsonPatch.Operations.Add(new Operation<PatchGuarantorsDTO>("replace", "/SecondName", null, "Pablo"));
 
-                //Verificación
-                var respuesta = resultado as NoContentResult;
-                var context3 = ConstruirContext(nombreDB);
-                var GuarantorActualizado = await context3.Guarantors.FirstAsync();
-                Assert.IsNotNull(respuesta);
-                Assert.AreEqual("Colombia", GuarantorActualizado.Country);
-                Assert.AreEqual("Pablo", GuarantorActualizado.SecondName);
-                Assert.AreEqual(1, mock.Invocations.Count);
-            }
-            else
-            {
-                //En caso de que la propiedad no exista la siguiente linea nos avisa que la prueba no salió bien
-                Assert.AreEqual(1, 0);
-            }
+            //Prueba
+            var resultado = await controller.Patch(jsonPatch, 1, 1, 1);
+
+            //Verificación
+            var respuesta = resultado as NoContentResult;
+            var context3 = ConstruirContext(nombreDB);
+            var GuarantorActualizado = await context3.Guarantors.FirstAsync();
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual("Colombia", GuarantorActualizado.Country);
+            Assert.AreEqual("Pablo", GuarantorActualizado.SecondName);
+            Assert.AreEqual(1, mock.Invocations.Count);
+
         }
-        
+
     }
 }
 
