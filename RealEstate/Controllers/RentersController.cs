@@ -13,14 +13,14 @@ namespace RealEstate.Controllers
     [ApiController]
     [Route("api/Estates/{IdEstate:int}/Renters")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class RentersController : ControllerBase
+    public class RentersController : CustomBaseController
     {
         private readonly RealEstateProjectContext context;
         private readonly IMapper mapper;
         private readonly IGetUserInfo getUser;
 
         public RentersController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser)
+            IGetUserInfo getUser):base(context,mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -47,45 +47,47 @@ namespace RealEstate.Controllers
         public async Task<ActionResult<List<GetRentersDTO>>> GetRentersOfEstate(int IdEstate)
         {
             var IdUser = await getUser.GetId();
-            var Estates = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!Estates)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("No existe dicha propiedad o no le pertenece");
-            }
-            var Renters = await context.Renters.Where(x => x.IdEstate == IdEstate).ToListAsync();
-            if (Renters.Count == 0)
-            {
-                return NotFound("La propiedad no está arrendada");
-            }
+                var Renters = await context.Renters.Where(x => x.IdEstate == IdEstate).ToListAsync();
+                if (Renters.Count == 0)
+                {
+                    return NotFound("La propiedad no está arrendada");
+                }
 
-            return mapper.Map<List<GetRentersDTO>>(Renters);
+                return mapper.Map<List<GetRentersDTO>>(Renters);
+            }
+            return ExisteEstate.Result;
+                
         }
 
         [HttpGet("{Id:int}", Name = "GetRenter")]
         public async Task<ActionResult<GetRentersDTO>> GetById(int IdEstate, int Id)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
+                var EstatesinRenters = await context.Renters.AnyAsync(x => x.IdEstate == IdEstate);
+                if (!EstatesinRenters)
+                {
+                    return NotFound("La propiedad no está arrendada");
+                }
+                var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == Id);
+                if (!ExistsRenter)
+                {
+                    return NotFound("No existe el Renter");
+                }
+                var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == Id && x.IdEstate == IdEstate);
+                if (Renter == null)
+                {
+                    return NotFound("No hay registros de que esta persona haya arrendado esta propiedad");
+                }
+                return mapper.Map<GetRentersDTO>(Renter);
             }
-            var EstatesinRenters = await context.Renters.AnyAsync(x => x.IdEstate == IdEstate);
-            if (!EstatesinRenters)
-            {
-                return NotFound("La propiedad no está arrendada");
-            }
-            var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == Id);
-            if (!ExistsRenter)
-            {
-                return NotFound("No existe el Renter");
-            }
-            var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == Id && x.IdEstate == IdEstate);
-            if (Renter == null)
-            {
-                return NotFound("No hay registros de que esta persona haya arrendado esta propiedad");
-            }
-            return mapper.Map<GetRentersDTO>(Renter);
+            return ExisteEstate.Result;
+                
         }
 
 
@@ -95,34 +97,37 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Post(int IdEstate, PostRentersDTO postRenterDTO)
         {
             var IdUser = await getUser.GetId();
-            var _Estate = context.Estates.FirstOrDefault(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (_Estate == null)
+            var Propiedad = await DevolverPropiedad(IdUser, IdEstate);
+            var Estate = Propiedad.Value;
+            if (Estate != null)
             {
-                return BadRequest("Se debe ingresar una propiedad válida");
-            }
-            if (_Estate.Sold == true)
-            {
-                return BadRequest("No se puede alquilar una propiedad que ya ha sido vendida previamente");
-            }
-            var RenterWithSameDNI = await context.Renters.AnyAsync(x => x.IdEstate == IdEstate && x.Dni == postRenterDTO.Dni);
-            if (RenterWithSameDNI)
-            {
-                return BadRequest($"Ya se tiene un Renter con el DNI: {postRenterDTO.Dni} ");
-            }
-            var _Renter = mapper.Map<Renter>(postRenterDTO);
-            _Renter.IdEstate = IdEstate;
-            context.Add(_Renter);
-            await context.SaveChangesAsync();
+                if (Estate.Sold == true)
+                {
+                    return BadRequest("No se puede alquilar una propiedad que ya ha sido vendida previamente");
+                }
+                var RenterWithSameDNI = await context.Renters.AnyAsync(x => x.IdEstate == IdEstate && x.Dni == postRenterDTO.Dni);
+                if (RenterWithSameDNI)
+                {
+                    return BadRequest($"Ya se tiene un Renter con el DNI: {postRenterDTO.Dni} ");
+                }
+                var _Renter = mapper.Map<Renter>(postRenterDTO);
+                _Renter.IdEstate = IdEstate;
+                context.Add(_Renter);
+                await context.SaveChangesAsync();
 
-            /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
-            pasarán a estar inactivos automáticamente*/
-            var Renters = context.Renters.Where(x => x.IdEstate == _Renter.IdEstate).AsQueryable();
-            var PreviousRenters = Renters.Where(x => x.IdRenter != _Renter.IdRenter).ToList();
-            PreviousRenters.ForEach(x => x.Active = false);
-            await context.SaveChangesAsync();
-         
-            var RenterDTO = mapper.Map<GetRentersDTO>(_Renter);
-            return CreatedAtRoute("GetRenter", new { IdEstate = IdEstate, Id = _Renter.IdRenter }, RenterDTO);
+                /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
+                pasarán a estar inactivos automáticamente*/
+                var Renters = context.Renters.Where(x => x.IdEstate == _Renter.IdEstate).AsQueryable();
+                var PreviousRenters = Renters.Where(x => x.IdRenter != _Renter.IdRenter).ToList();
+                PreviousRenters.ForEach(x => x.Active = false);
+                await context.SaveChangesAsync();
+
+                var RenterDTO = mapper.Map<GetRentersDTO>(_Renter);
+                return CreatedAtRoute("GetRenter", new { IdEstate = IdEstate, Id = _Renter.IdRenter }, RenterDTO);
+
+            }
+            return Propiedad.Result;
+            
         }
 
 
@@ -131,24 +136,25 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Delete(int IdEstate, int id)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
+                var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == id);
+                if (!ExistsRenter)
+                {
+                    return NotFound("No existe registro del renter");
+                }
+                var ExistsEstateInRenters = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == id && x.IdEstate == IdEstate);
+                if (ExistsEstateInRenters == null)
+                {
+                    return NotFound($"No hay registros que coincidan con id de la propiedad: {IdEstate}, y el id del renter: {id}.");
+                }
+                context.Renters.Remove(ExistsEstateInRenters);
+                await context.SaveChangesAsync();
+                return Ok("Renter eliminado");
             }
-            var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == id);
-            if (!ExistsRenter)
-            {
-                return NotFound("No existe registro del renter");
-            }
-            var ExistsEstateInRenters = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == id && x.IdEstate == IdEstate);
-            if (ExistsEstateInRenters == null)
-            {
-                return NotFound($"No hay registros que coincidan con id de la propiedad: {IdEstate}, y el id del renter: {id}.");
-            }
-            context.Renters.Remove(ExistsEstateInRenters);
-            await context.SaveChangesAsync();
-            return Ok("Renter eliminado");
+            return ExisteEstate.Result;
+                
         }
 
         [HttpPatch("{IdRenter:int}")]
@@ -160,41 +166,40 @@ namespace RealEstate.Controllers
             }
             var IdUser = await getUser.GetId();
 
-            var _Estate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!_Estate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
-            }
-            var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdRenter == IdRenter);
-            if (Renter == null)
-            {
-                return NotFound("No existe el Renter o la propiedad no le pertenece");
-            }
-            var CampoActualizar = jsonPatchDocument.Operations[0].path;
-            var Valor = jsonPatchDocument.Operations[0].value.ToString();
+                var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdRenter == IdRenter);
+                if (Renter == null)
+                {
+                    return NotFound("No existe el Renter o la propiedad no le pertenece");
+                }
+                var CampoActualizar = jsonPatchDocument.Operations[0].path;
+                var Valor = jsonPatchDocument.Operations[0].value.ToString();
 
-            if (CampoActualizar == "/Active" && Valor == "true")
-            {
-                /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
-            pasarán a estar inactivos automáticamente*/
-                var Renters = context.Renters.Where(x => x.IdEstate == Renter.IdEstate).AsQueryable();
-                var PreviousRenters = Renters.Where(x => x.IdRenter != Renter.IdRenter).ToList();
-                PreviousRenters.ForEach(x => x.Active = false);
+                if (CampoActualizar == "/Active" && Valor == "true")
+                {
+                    /*Se actualizará la tabla Renters y pondrá Activo al último Renter que se agregó, ya los Renters viejos de la misma propiedad
+                pasarán a estar inactivos automáticamente*/
+                    var Renters = context.Renters.Where(x => x.IdEstate == Renter.IdEstate).AsQueryable();
+                    var PreviousRenters = Renters.Where(x => x.IdRenter != Renter.IdRenter).ToList();
+                    PreviousRenters.ForEach(x => x.Active = false);
+                    await context.SaveChangesAsync();
+                }
+
+                var RenterDTO = mapper.Map<PatchRentersDTO>(Renter);
+                jsonPatchDocument.ApplyTo(RenterDTO, ModelState);
+                bool esValido = TryValidateModel(RenterDTO);
+                if (!esValido)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                mapper.Map(RenterDTO, Renter);
                 await context.SaveChangesAsync();
+                return NoContent();
             }
-
-            var RenterDTO = mapper.Map<PatchRentersDTO>(Renter);
-            jsonPatchDocument.ApplyTo(RenterDTO, ModelState);
-            bool esValido = TryValidateModel(RenterDTO);
-            if (!esValido)
-            {
-                return BadRequest(ModelState);
-            }
-
-            mapper.Map(RenterDTO, Renter);
-            await context.SaveChangesAsync();
-            return NoContent();
-
+            return ExisteEstate.Result;
         }
     }
 }

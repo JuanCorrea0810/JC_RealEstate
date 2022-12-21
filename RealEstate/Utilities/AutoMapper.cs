@@ -38,7 +38,7 @@ namespace RealEstate.Utilities
             CreateMap<Guarantor, PatchGuarantorsDTO>().ReverseMap();
 
 
-            CreateMap<Estate, GetEstatesDTO>();
+            CreateMap<Estate, GetEstatesDTO>().ReverseMap();
             CreateMap<PostEstatesDTO, Estate>();
             CreateMap<Estate, PatchEstatesDTO>().ReverseMap();
 

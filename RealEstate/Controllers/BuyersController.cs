@@ -13,14 +13,14 @@ namespace RealEstate.Controllers
     [ApiController]
     [Route("api/Estates/{IdEstate:int}/Buyer")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class BuyersController: ControllerBase
+    public class BuyersController: CustomBaseController
     {
         private readonly RealEstateProjectContext context;
         private readonly IMapper mapper;
         private readonly IGetUserInfo getUser;
 
         public BuyersController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser)
+            IGetUserInfo getUser):base(context,mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -52,18 +52,19 @@ namespace RealEstate.Controllers
         public async Task<ActionResult<GetBuyersDTO>> GetById([FromRoute] int IdEstate)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser,IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
-            }
+                var EstatesInBuyers = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
+                if (EstatesInBuyers == null)
+                {
+                    return NotFound("La propiedad no ha sido comprada aún");
+                }
+                return mapper.Map<GetBuyersDTO>(EstatesInBuyers);
 
-            var EstatesInBuyers = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
-            if (EstatesInBuyers == null)
-            {
-                return NotFound("La propiedad no ha sido comprada aún");
             }
-            return mapper.Map<GetBuyersDTO>(EstatesInBuyers);
+            return ExisteEstate.Result;
+            
         }
 
 
@@ -72,25 +73,26 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Post([FromRoute] int IdEstate, PostBuyersDTO postBuyerDTO)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return BadRequest("Se debe ingresar el Id de una propiedad válida");
+                var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdEstate == IdEstate);
+                if (ExistsBuyer)
+                {
+                    return BadRequest("Ya dicha propiedad ha sido comprada previamente");
+                }
+
+                var Buyer = mapper.Map<Buyer>(postBuyerDTO);
+                Buyer.IdEstate = IdEstate;
+
+                context.Add(Buyer);
+                await context.SaveChangesAsync();
+
+                var BuyerDTO = mapper.Map<GetBuyersDTO>(Buyer);
+                return CreatedAtRoute("GetBuyer", new { IdEstate = IdEstate }, BuyerDTO);
             }
-            var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdEstate == IdEstate);
-            if (ExistsBuyer)
-            {
-                return BadRequest("Ya dicha propiedad ha sido comprada previamente");
-            }
-
-            var Buyer = mapper.Map<Buyer>(postBuyerDTO);
-            Buyer.IdEstate = IdEstate;
-
-            context.Add(Buyer);
-            await context.SaveChangesAsync();
-
-            var BuyerDTO = mapper.Map<GetBuyersDTO>(Buyer);
-            return CreatedAtRoute("GetBuyer", new { IdEstate = IdEstate }, BuyerDTO);
+            return ExisteEstate.Result;
+            
         }
 
 
@@ -98,19 +100,20 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Delete(int IdEstate)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
+                var ExistsBuyer = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
+                if (ExistsBuyer == null)
+                {
+                    return NotFound("No se ha registrado ninguna compra para esta propiedad");
+                }
+                context.Buyers.Remove(ExistsBuyer);
+                await context.SaveChangesAsync();
+                return Ok("Comprador eliminado");
             }
-            var ExistsBuyer = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
-            if (ExistsBuyer == null)
-            {
-                return NotFound("No se ha registrado ninguna compra para esta propiedad");
-            }
-            context.Buyers.Remove(ExistsBuyer);
-            await context.SaveChangesAsync();
-            return Ok("Comprador eliminado");
+            return ExisteEstate.Result;
+                
         }
 
         [HttpPatch]
@@ -121,28 +124,28 @@ namespace RealEstate.Controllers
                 return BadRequest();
             }
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
-            }
-            var Buyer = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
-            if (Buyer == null)
-            {
-                return NotFound("No existe Comprador para esta propiedad");
-            }
+                var Buyer = await context.Buyers.FirstOrDefaultAsync(x => x.IdEstate == IdEstate);
+                if (Buyer == null)
+                {
+                    return NotFound("No existe Comprador para esta propiedad");
+                }
 
-            var BuyerDTO = mapper.Map<PatchBuyersDTO>(Buyer);
-            jsonPatchDocument.ApplyTo(BuyerDTO, ModelState);
-            bool esValido = TryValidateModel(BuyerDTO);
-            if (!esValido)
-            {
-                return BadRequest(ModelState);
-            }
+                var BuyerDTO = mapper.Map<PatchBuyersDTO>(Buyer);
+                jsonPatchDocument.ApplyTo(BuyerDTO, ModelState);
+                bool esValido = TryValidateModel(BuyerDTO);
+                if (!esValido)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            mapper.Map(BuyerDTO, Buyer);
-            await context.SaveChangesAsync();
-            return NoContent();
+                mapper.Map(BuyerDTO, Buyer);
+                await context.SaveChangesAsync();
+                return NoContent();
+            }
+            return ExisteEstate.Result;
 
         }
     }

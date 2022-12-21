@@ -315,9 +315,9 @@ namespace RealEstateTests.PruebasUnitarias
             var resultado = await controller.Post(1, dto);
 
             //Verificación
-            var respuesta = resultado as BadRequestObjectResult;
+            var respuesta = resultado as NotFoundObjectResult;
             Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400, respuesta.StatusCode);
+            Assert.AreEqual(404, respuesta.StatusCode);
             Assert.AreEqual(1, mock.Invocations.Count);
         }
         [TestMethod]

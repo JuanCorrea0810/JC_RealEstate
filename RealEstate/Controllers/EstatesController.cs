@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -14,14 +15,14 @@ namespace RealEstate.Controllers
     [ApiController]
     [Route("api/Estates")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class EstatesController : ControllerBase
+    public class EstatesController : CustomBaseController
     {
             private readonly RealEstateProjectContext context;
             private readonly IMapper mapper;
             private readonly IGetUserInfo getUser;
 
         public EstatesController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser)
+            IGetUserInfo getUser):base(context,mapper)
         {
             this.context = context;
             this.mapper = mapper; 
@@ -41,12 +42,8 @@ namespace RealEstate.Controllers
         {
             
             var IdUser = await getUser.GetId();
-            var Estates = await context.Estates.Where(x => x.IdUser == IdUser).ToListAsync();
-            if (Estates.Count == 0)
-            {
-                return NotFound("El usuario no ha registrado ninguna propiedad");
-            }
-            return mapper.Map<List<GetEstatesDTO>>(Estates);
+            var Estates = await ElUsuarioTienePropiedades(IdUser);
+            return Estates;
         }
 
 
@@ -56,12 +53,8 @@ namespace RealEstate.Controllers
         {
 
             var IdUser = await getUser.GetId();
-            var _Estate = await context.Estates.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (_Estate == null)
-            {
-                return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
-            }
-            return mapper.Map<GetEstatesDTO>(_Estate);
+            var _Estate = await DevolverPropiedad(IdUser,IdEstate);
+            return _Estate;
         }
 
         [HttpGet("{Alias}")]
@@ -121,14 +114,21 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
 
-            var _Estate = await context.Estates.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (_Estate == null)
+            var Propiedad = await DevolverPropiedad(IdUser, IdEstate);
+            
+            //Si la Propiedad no existe entonces el método de arriba nos manda un ActionResult con el código 404 NotFound
+            var respuestaActionResult = Propiedad.Result;
+            if (respuestaActionResult == null)
             {
-                return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
+                //Si no manda codigo 404 significa que nos devolvió una propiedad y podemos trabajar con ella
+                var EstateDTO = Propiedad.Value;
+                var Estate = mapper.Map<Estate>(EstateDTO);
+                context.Remove(Estate);
+                await context.SaveChangesAsync();
+                return Ok("Propiedad eliminada");
             }
-            context.Estates.Remove(_Estate);
-            await context.SaveChangesAsync();
-            return Ok("Propiedad eliminada");
+            return respuestaActionResult;
+            
         }
 
         [HttpPatch("{IdEstate:int}")]
@@ -140,50 +140,57 @@ namespace RealEstate.Controllers
             }
             var IdUser = await getUser.GetId();
 
-            var _Estate = await context.Estates.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (_Estate == null)
+            //Si propiedad no existe se retorna 404
+            var Propiedad = await DevolverPropiedad(IdUser, IdEstate);
+            var EstateDTO = Propiedad.Value;
+            if (EstateDTO != null)
             {
-                return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
-            }
-            var CampoActualizar = jsonPatchDocument.Operations[0].path;
-            var Operacion = jsonPatchDocument.Operations[0].op; 
-            var Valor = jsonPatchDocument.Operations[0].value.ToString();
-
-            //Saber si el usuario quiere actualizar es el campo "Alias" y verificar que no se repita 
-            if (CampoActualizar == "/Alias" && Operacion == "replace")
-            {
-
-                var Entidad = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(Valor) && x.IdUser == IdUser);
+                var Estate = mapper.Map<Estate>(EstateDTO);
 
 
-                if (Entidad != null)
+                var CampoActualizar = jsonPatchDocument.Operations[0].path;
+                var Operacion = jsonPatchDocument.Operations[0].op;
+                var Valor = jsonPatchDocument.Operations[0].value.ToString();
+
+                //Saber si el usuario quiere actualizar es el campo "Alias" y verificar que no se repita 
+                if (CampoActualizar == "/Alias" && Operacion == "replace")
                 {
-                    var AliasDB = Entidad.Alias.ToCharArray();
-                    var SameAlias = Valor.ToCharArray();
 
-                    if (SameAlias.Length == AliasDB.Length)
+                    var Entidad = await context.Estates.FirstOrDefaultAsync(x => x.Alias.Contains(Valor) && x.IdUser == IdUser);
+
+
+                    if (Entidad != null)
                     {
-                        return BadRequest($"El usuario ya registró una propiedad previamente con el alias : {Valor}");
+                        var AliasDB = Entidad.Alias.ToCharArray();
+                        var SameAlias = Valor.ToCharArray();
+
+                        if (SameAlias.Length == AliasDB.Length)
+                        {
+                            return BadRequest($"El usuario ya registró una propiedad previamente con el alias : {Valor}");
+                        }
                     }
+
                 }
 
+                var EstatesDTO = mapper.Map<PatchEstatesDTO>(Estate);
+                jsonPatchDocument.ApplyTo(EstatesDTO, ModelState);
+
+                bool esValido = TryValidateModel(EstateDTO);
+                if (!esValido)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                mapper.Map(EstatesDTO, Estate);
+                context.Entry(Estate).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                return NoContent();
+
             }
-
-            var EstateDTO = mapper.Map<PatchEstatesDTO>(_Estate);
-            jsonPatchDocument.ApplyTo(EstateDTO, ModelState);
-
-            bool esValido = TryValidateModel(EstateDTO);
-            if (!esValido)
-            {
-                return BadRequest(ModelState);
-            }
-
-            mapper.Map(EstateDTO, _Estate);
-            await context.SaveChangesAsync();
-            return NoContent();
+            return Propiedad.Result;
 
         }
+            
 
-  
     }
 }
