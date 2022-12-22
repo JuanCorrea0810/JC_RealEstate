@@ -20,7 +20,7 @@ namespace RealEstate.Controllers
         private readonly IGetUserInfo getUser;
 
         public GuarantorController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -59,7 +59,7 @@ namespace RealEstate.Controllers
                 var ExisteRenter = await SaberSiExisteRenter(IdRenter);
                 if (ExisteRenter.Value)
                 {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate,IdRenter);
+                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
                     if (HayRelacion.Value)
                     {
                         var Guarantors = await context.Guarantors.Where(x => x.IdRenter == IdRenter).ToListAsync();
@@ -74,7 +74,7 @@ namespace RealEstate.Controllers
                 return ExisteRenter.Result;
             }
             return ExisteEstate.Result;
-                
+
         }
 
         [HttpGet("{Id:int}", Name = "GetGuarantor")]
@@ -103,12 +103,12 @@ namespace RealEstate.Controllers
                         return ExisteGuarantor.Result;
                     }
                     return HayRelacion.Result;
-                        
+
                 }
                 return ExisteRenter.Result;
             }
             return ExisteEstate.Result;
-            
+
         }
 
 
@@ -141,12 +141,12 @@ namespace RealEstate.Controllers
                         return CreatedAtRoute("GetGuarantor", new { IdEstate = IdEstate, IdRenter = IdRenter, Id = guarantor.IdGuarantor }, GuarantorDTO);
                     }
                     return HayRelacion.Result;
-                        
+
                 }
                 return ExisteRenter.Result;
             }
             return ExisteEstate.Result;
-                    
+
         }
 
 
@@ -177,14 +177,14 @@ namespace RealEstate.Controllers
                             await context.SaveChangesAsync();
                             return Ok("Fiador eliminado");
                         }
-                        return ExisteGuarantor.Result;   
+                        return ExisteGuarantor.Result;
                     }
-                    return HayRelacion.Result;        
+                    return HayRelacion.Result;
                 }
                 return ExisteRenter.Result;
             }
             return ExisteEstate.Result;
-                    
+
         }
 
         [HttpPatch("{Id:int}")]

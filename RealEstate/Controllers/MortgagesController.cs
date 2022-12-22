@@ -20,7 +20,7 @@ namespace RealEstate.Controllers
         private readonly IGetUserInfo getUser;
 
         public MortgagesController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -52,7 +52,7 @@ namespace RealEstate.Controllers
                 }
                 return mapper.Map<GetMorgagesDTO>(Mortgage);
             }
-            return ExisteEstate.Result;      
+            return ExisteEstate.Result;
         }
 
 
@@ -80,7 +80,7 @@ namespace RealEstate.Controllers
             }
             return ExisteEstate.Result;
 
-                
+
         }
 
         [HttpDelete]
@@ -100,7 +100,7 @@ namespace RealEstate.Controllers
                 return Ok("Registro eliminado");
             }
             return ExisteEstate.Result;
-                
+
         }
 
         [HttpPatch]

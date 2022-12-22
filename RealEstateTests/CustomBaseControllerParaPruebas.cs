@@ -1,27 +1,32 @@
 ﻿using AutoMapper;
-using Mailjet.Client.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstate.DTO_s.EstatesDTO_s;
 using RealEstate.Models;
-using RealEstate.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace RealEstate.Controllers
+namespace RealEstateTests
 {
-    
-    public class CustomBaseController : ControllerBase
+    internal class CustomBaseControllerParaPruebas : ControllerBase
     {
         private readonly RealEstateProjectContext context;
         private readonly IMapper mapper;
 
-        public CustomBaseController(RealEstateProjectContext context, IMapper mapper)
+        public CustomBaseControllerParaPruebas(RealEstateProjectContext context, IMapper mapper)
         {
             this.context = context;
             this.mapper = mapper;
         }
 
-        // Clase que guardará los métodos más comúnes que se repiten en varios controladores
-        protected async Task<ActionResult<List<GetEstatesDTO>>> ElUsuarioTienePropiedades(string IdUser)
+        // Esta Clase replica el comportamiento de CustomBaseController, solo que sus métodos son públicos para poder hacer
+        // uso de ellos desde una prueba unitaria, ya que en CustomBaseController los métodos son protected.
+        // Y desde la prueba unitaria no podemos heredar más de una clase.
+        // Así que cada vez que hagamos un cambio en CustomBaseController lo tenemos que hacer también en esta clase
+        public async Task<ActionResult<List<GetEstatesDTO>>> ElUsuarioTienePropiedades(string IdUser)
         {
             var Estates = await context.Estates.Where(x => x.IdUser == IdUser).ToListAsync();
             if (Estates.Count == 0)
@@ -31,22 +36,22 @@ namespace RealEstate.Controllers
             return mapper.Map<List<GetEstatesDTO>>(Estates);
         }
 
-        protected async Task<ActionResult<GetEstatesDTO>> DevolverPropiedad(string IdUser, int IdEstate)
+        public async Task<ActionResult<GetEstatesDTO>> DevolverPropiedad(string IdUser, int IdEstate)
         {
             var Estate = await context.Estates.FirstOrDefaultAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
             if (Estate == null)
             {
                 return NotFound("La propiedad no existe o el usuario no es dueño de dicha propiedad");
             }
-            
+
             //Esto se hace para que una instancia de la Entidad ExisteEstate no quede atada a un contexto de EntityFramework
             //Y por eso se pueda hacer diferentes operaciones con esta entidad desde el mismo contexto HTTP
             context.Entry(Estate).State = EntityState.Detached;
-            
+
             return mapper.Map<GetEstatesDTO>(Estate);
         }
 
-        protected async Task<ActionResult<bool>> SaberSiExistePropiedad(string IdUser, int IdEstate)
+        public async Task<ActionResult<bool>> SaberSiExistePropiedad(string IdUser, int IdEstate)
         {
             var ExisteEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
             if (!ExisteEstate)
@@ -56,7 +61,7 @@ namespace RealEstate.Controllers
             return ExisteEstate;
         }
 
-        protected async Task<ActionResult<bool>> SaberSiExisteRenter(int IdRenter)
+        public async Task<ActionResult<bool>> SaberSiExisteRenter(int IdRenter)
         {
             var Renter = await context.Renters.AnyAsync(x => x.IdRenter == IdRenter);
             if (!Renter)
@@ -65,7 +70,7 @@ namespace RealEstate.Controllers
             }
             return Renter;
         }
-        protected async Task<ActionResult<bool>> SaberSiHayRelacionEntreRenterYEstate(int IdEstate, int IdRenter)
+        public async Task<ActionResult<bool>> SaberSiHayRelacionEntreRenterYEstate(int IdEstate, int IdRenter)
         {
             var EstatesinRenters = await context.Renters.AnyAsync(x => x.IdEstate == IdEstate && x.IdRenter == IdRenter);
             if (!EstatesinRenters)
@@ -74,7 +79,7 @@ namespace RealEstate.Controllers
             }
             return EstatesinRenters;
         }
-        protected async Task<ActionResult<bool>> SaberSiExisteGuarantor(int Id)
+        public async Task<ActionResult<bool>> SaberSiExisteGuarantor(int Id)
         {
             var Guarantor = await context.Guarantors.AnyAsync(x => x.IdGuarantor == Id);
             if (!Guarantor)
@@ -84,7 +89,7 @@ namespace RealEstate.Controllers
             return Guarantor;
         }
 
-        protected async Task<ActionResult<bool>> SaberSiExisteMortgage(int IdEstate)
+        public async Task<ActionResult<bool>> SaberSiExisteMortgage(int IdEstate)
         {
             var Mortgage = await context.Mortgages.AnyAsync(x => x.IdEstate == IdEstate);
             if (!Mortgage)
@@ -93,7 +98,7 @@ namespace RealEstate.Controllers
             }
             return Mortgage;
         }
-        protected async Task<ActionResult<bool>> SaberSiHayRelacionEntreHipotecaYPropiedad(int IdEstate,int IdMortgage)
+        public async Task<ActionResult<bool>> SaberSiHayRelacionEntreHipotecaYPropiedad(int IdEstate, int IdMortgage)
         {
             var ExistsEstateInMortgage = await context.Mortgages.AnyAsync(x => x.IdEstate == IdEstate && x.IdMortgage == IdMortgage);
             if (!ExistsEstateInMortgage)

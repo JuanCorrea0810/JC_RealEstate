@@ -36,7 +36,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.DevolverPropiedad("Usuario1", 1);
 
@@ -54,7 +54,7 @@ namespace RealEstateTests.PruebasUnitarias
             var mapper = ConfigurarAutoMapper();
             await context.SaveChangesAsync();
 
-            var controller = new CustomBaseController(context, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context, mapper);
             //Prueba
             var resultado = await controller.DevolverPropiedad("Usuario1", 1);
 
@@ -73,7 +73,7 @@ namespace RealEstateTests.PruebasUnitarias
             var mapper = ConfigurarAutoMapper();
             await context.SaveChangesAsync();
 
-            var controller = new CustomBaseController(context, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context, mapper);
             //Prueba
             var resultado = await controller.SaberSiExistePropiedad("Usuario1", 1);
 
@@ -106,7 +106,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.SaberSiExistePropiedad("Usuario1", 1);
 
@@ -139,7 +139,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.SaberSiExisteRenter(1);
 
@@ -156,7 +156,7 @@ namespace RealEstateTests.PruebasUnitarias
             var mapper = ConfigurarAutoMapper();
             await context.SaveChangesAsync();
 
-            var controller = new CustomBaseController(context, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context, mapper);
             //Prueba
             var resultado = await controller.SaberSiExisteRenter(1);
 
@@ -191,7 +191,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.SaberSiExisteGuarantor(1);
 
@@ -208,7 +208,7 @@ namespace RealEstateTests.PruebasUnitarias
             var mapper = ConfigurarAutoMapper();
             await context.SaveChangesAsync();
 
-            var controller = new CustomBaseController(context, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context, mapper);
             //Prueba
             var resultado = await controller.SaberSiExisteGuarantor(1);
 
@@ -256,7 +256,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.SaberSiHayRelacionEntreRenterYEstate(1,1);
 
@@ -303,7 +303,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
             var context2 = ConstruirContext(nombreDB);
 
-            var controller = new CustomBaseController(context2, mapper);
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
             //Prueba
             var resultado = await controller.SaberSiHayRelacionEntreRenterYEstate(1, 1);
 

@@ -20,7 +20,7 @@ namespace RealEstate.Controllers
         private readonly IGetUserInfo getUser;
 
         public RentersController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -59,7 +59,7 @@ namespace RealEstate.Controllers
                 return mapper.Map<List<GetRentersDTO>>(Renters);
             }
             return ExisteEstate.Result;
-                
+
         }
 
         [HttpGet("{Id:int}", Name = "GetRenter")]
@@ -87,7 +87,7 @@ namespace RealEstate.Controllers
                 return mapper.Map<GetRentersDTO>(Renter);
             }
             return ExisteEstate.Result;
-                
+
         }
 
 
@@ -127,7 +127,7 @@ namespace RealEstate.Controllers
 
             }
             return Propiedad.Result;
-            
+
         }
 
 
@@ -154,7 +154,7 @@ namespace RealEstate.Controllers
                 return Ok("Renter eliminado");
             }
             return ExisteEstate.Result;
-                
+
         }
 
         [HttpPatch("{IdRenter:int}")]

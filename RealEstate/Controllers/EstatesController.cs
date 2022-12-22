@@ -11,21 +11,21 @@ using RealEstate.Utilities;
 
 namespace RealEstate.Controllers
 {
-    
+
     [ApiController]
     [Route("api/Estates")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EstatesController : CustomBaseController
     {
-            private readonly RealEstateProjectContext context;
-            private readonly IMapper mapper;
-            private readonly IGetUserInfo getUser;
+        private readonly RealEstateProjectContext context;
+        private readonly IMapper mapper;
+        private readonly IGetUserInfo getUser;
 
         public EstatesController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
-            this.mapper = mapper; 
+            this.mapper = mapper;
             this.getUser = getUser;
         }
 
@@ -40,7 +40,7 @@ namespace RealEstate.Controllers
         [HttpGet(Name = "UserAndTheirEstates")]
         public async Task<ActionResult<List<GetEstatesDTO>>> GetUserAndTheirEstates()
         {
-            
+
             var IdUser = await getUser.GetId();
             var Estates = await ElUsuarioTienePropiedades(IdUser);
             return Estates;
@@ -53,7 +53,7 @@ namespace RealEstate.Controllers
         {
 
             var IdUser = await getUser.GetId();
-            var _Estate = await DevolverPropiedad(IdUser,IdEstate);
+            var _Estate = await DevolverPropiedad(IdUser, IdEstate);
             return _Estate;
         }
 
@@ -115,7 +115,7 @@ namespace RealEstate.Controllers
             var IdUser = await getUser.GetId();
 
             var Propiedad = await DevolverPropiedad(IdUser, IdEstate);
-            
+
             //Si la Propiedad no existe entonces el método de arriba nos manda un ActionResult con el código 404 NotFound
             var respuestaActionResult = Propiedad.Result;
             if (respuestaActionResult == null)
@@ -128,7 +128,7 @@ namespace RealEstate.Controllers
                 return Ok("Propiedad eliminada");
             }
             return respuestaActionResult;
-            
+
         }
 
         [HttpPatch("{IdEstate:int}")]
@@ -190,7 +190,17 @@ namespace RealEstate.Controllers
             return Propiedad.Result;
 
         }
-            
+        //[HttpGet(Name = "UserAndTheirEstates")]
+        //public async Task<ActionResult<List<GetEstatesDTO>>> ElUsuarioTienePropiedades(string IdUser)
+        //{
+        //    var Estates = await context.Estates.Where(x => x.IdUser == IdUser).ToListAsync();
+        //    if (Estates.Count == 0)
+        //    {
+        //        return NotFound("El usuario no ha registrado ninguna propiedad");
+        //    }
+        //    return mapper.Map<List<GetEstatesDTO>>(Estates);
+        //}
+
 
     }
 }
