@@ -102,5 +102,23 @@ namespace RealEstate.Controllers
             }
             return ExistsEstateInMortgage;
         }
+        protected async Task<ActionResult<bool>> SaberSiExisteBuyer(int IdBuyer)
+        {
+            var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer);
+            if (!ExistsBuyer)
+            {
+                return NotFound("El Comprador no existe");
+            }
+            return ExistsBuyer;
+        }
+        protected async Task<ActionResult<bool>> SaberSiHayRelacionEntreBuyerYPropiedad(int IdEstate, int IdBuyer)
+        {
+            var ExistsEstateInBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer && x.IdEstate == IdEstate);
+            if (!ExistsEstateInBuyer)
+            {
+                return NotFound("El comprador no coincide con esta propiedad");
+            }
+            return ExistsEstateInBuyer;
+        }
     }
 }

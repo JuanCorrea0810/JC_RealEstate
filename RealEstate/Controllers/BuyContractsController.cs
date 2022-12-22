@@ -14,14 +14,14 @@ namespace RealEstate.Controllers
     [ApiController]
     [Route("api/Estates/{IdEstate:int}/Buyer/{IdBuyer:int}/BuyContracts")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class BuyContractsController : ControllerBase
+    public class BuyContractsController : CustomBaseController
     {
         private readonly RealEstateProjectContext context;
         private readonly IMapper mapper;
         private readonly IGetUserInfo getUser;
 
         public BuyContractsController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -55,27 +55,29 @@ namespace RealEstate.Controllers
         public async Task<ActionResult<GetBuyContractsDTo>> Get([FromRoute] int IdEstate, [FromRoute] int IdBuyer)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
+                var ExisteBuyer = await SaberSiExisteBuyer(IdBuyer);
+                if (ExisteBuyer.Value)
+                {
+                    var HayRelacion = await SaberSiHayRelacionEntreBuyerYPropiedad(IdEstate, IdBuyer);
+                    if (HayRelacion.Value)
+                    {
+                        var BuyContracts = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdBuyer == IdBuyer && x.IdEst == IdEstate);
+                        if (BuyContracts == null)
+                        {
+                            return NotFound("El usuario no ha registrado ningun contrato sobre dicha compra");
+                        }
+                        return mapper.Map<GetBuyContractsDTo>(BuyContracts);
+                    }
+                    return HayRelacion.Result;
+
+                }
+                return ExisteBuyer.Result;
             }
-            var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer);
-            if (!ExistsBuyer)
-            {
-                return NotFound("El Comprador no existe");
-            }
-            var ExistsEstateInBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer && x.IdEstate == IdEstate);
-            if (!ExistsEstateInBuyer)
-            {
-                return NotFound("El comprador no coincide con esta propiedad");
-            }
-            var BuyContracts = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdBuyer == IdBuyer && x.IdEst == IdEstate);
-            if (BuyContracts == null)
-            {
-                return NotFound("El usuario no ha registrado ningun contrato sobre dicha compra");
-            }
-            return mapper.Map<GetBuyContractsDTo>(BuyContracts);
+            return ExisteEstate.Result;
+
         }
 
 
@@ -85,29 +87,35 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Post(PostBuyContractsDTO postBuyContract, [FromRoute] int IdEstate, [FromRoute] int IdBuyer)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
-            }
-            var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer);
-            if (!ExistsBuyer)
-            {
-                return NotFound("El Comprador no existe");
-            }
-            var ExistsEstateInBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer && x.IdEstate == IdEstate);
-            if (!ExistsEstateInBuyer)
-            {
-                return NotFound("El comprador no coincide con esta propiedad");
-            }
-            var BuyContract = mapper.Map<Buycontract>(postBuyContract);
-            BuyContract.IdBuyer = IdBuyer;
-            BuyContract.IdEst = IdEstate;
-            context.Add(BuyContract);
-            await context.SaveChangesAsync();
+                var ExisteBuyer = await SaberSiExisteBuyer(IdBuyer);
+                if (ExisteBuyer.Value)
+                {
+                    var HayRelacion = await SaberSiHayRelacionEntreBuyerYPropiedad(IdEstate, IdBuyer);
+                    if (HayRelacion.Value)
+                    {
+                        var ExisteBuyContract = await context.Buycontracts.AnyAsync(x=> x.IdBuyer == IdBuyer && x.IdEst == IdEstate);
+                        if (ExisteBuyContract)
+                        {
+                            return BadRequest("Ya la propiedad ha sido previamente comprada");
+                        }
+                        var BuyContract = mapper.Map<Buycontract>(postBuyContract);
+                        BuyContract.IdBuyer = IdBuyer;
+                        BuyContract.IdEst = IdEstate;
+                        context.Add(BuyContract);
+                        await context.SaveChangesAsync();
 
-            var BuyContractDTO = mapper.Map<GetBuyContractsDTo>(BuyContract);
-            return CreatedAtRoute("GetContract", new { IdEstate = IdEstate, IdBuyer = IdBuyer }, BuyContractDTO);
+                        var BuyContractDTO = mapper.Map<GetBuyContractsDTo>(BuyContract);
+                        return CreatedAtRoute("GetContract", new { IdEstate = IdEstate, IdBuyer = IdBuyer }, BuyContractDTO);
+                    }
+                    return HayRelacion.Result;
+                }
+                return ExisteBuyer.Result;
+            }
+            return ExisteEstate.Result;
+                        
 
         }
 
@@ -115,29 +123,30 @@ namespace RealEstate.Controllers
         public async Task<ActionResult> Delete([FromRoute] int IdEstate, [FromRoute] int IdBuyer)
         {
             var IdUser = await getUser.GetId();
-            var ExistsEstate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!ExistsEstate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
+                var ExisteBuyer = await SaberSiExisteBuyer(IdBuyer);
+                if (ExisteBuyer.Value)
+                {
+                    var HayRelacion = await SaberSiHayRelacionEntreBuyerYPropiedad(IdEstate, IdBuyer);
+                    if (HayRelacion.Value)
+                    {
+                        var BuyContract = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdEst == IdEstate && x.IdBuyer == IdBuyer);
+                        if (BuyContract == null)
+                        {
+                            return NotFound("No se ha registrado dicho contrato para esta compra");
+                        }
+                        context.Buycontracts.Remove(BuyContract);
+                        await context.SaveChangesAsync();
+                        return Ok("Contrato eliminado");
+                    }
+                    return HayRelacion.Result;
+                }
+                return ExisteBuyer.Result;
             }
-            var ExistsBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer);
-            if (!ExistsBuyer)
-            {
-                return NotFound("El Comprador no existe");
-            }
-            var ExistsEstateInBuyer = await context.Buyers.AnyAsync(x => x.IdBuyer == IdBuyer && x.IdEstate == IdEstate);
-            if (!ExistsEstateInBuyer)
-            {
-                return NotFound("El comprador no coincide con esta propiedad");
-            }
-            var BuyContract = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdEst == IdEstate && x.IdBuyer == IdBuyer);
-            if (BuyContract == null)
-            {
-                return NotFound("No se ha registrado dicho contrato para esta compra");
-            }
-            context.Buycontracts.Remove(BuyContract);
-            await context.SaveChangesAsync();
-            return Ok("Contrato eliminado");
+            return ExisteEstate.Result;
+                        
         }
 
         [HttpPatch]
@@ -148,34 +157,38 @@ namespace RealEstate.Controllers
                 return BadRequest();
             }
             var IdUser = await getUser.GetId();
-            var _Estate = await context.Estates.AnyAsync(x => x.IdEstate == IdEstate && x.IdUser == IdUser);
-            if (!_Estate)
+            var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
+            if (ExisteEstate.Value)
             {
-                return NotFound("La propiedad no existe o no le pertenece");
-            }
-            var Buyer = await context.Buyers.AnyAsync(x => x.IdEstate == IdEstate && x.IdBuyer == IdBuyer);
-            if (!Buyer)
-            {
-                return NotFound("No existe el Comprador o la propiedad no le pertenece");
-            }
-            var BuyContract = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdEst == IdEstate && x.IdBuyer == IdBuyer);
-            if (BuyContract == null)
-            {
-                return NotFound("El usuario no ha registrado dicho contrato de compra");
-            }
+                var ExisteBuyer = await SaberSiExisteBuyer(IdBuyer);
+                if (ExisteBuyer.Value)
+                {
+                    var HayRelacion = await SaberSiHayRelacionEntreBuyerYPropiedad(IdEstate, IdBuyer);
+                    if (HayRelacion.Value)
+                    {
+                        var BuyContract = await context.Buycontracts.FirstOrDefaultAsync(x => x.IdEst == IdEstate && x.IdBuyer == IdBuyer);
+                        if (BuyContract == null)
+                        {
+                            return NotFound("El usuario no ha registrado dicho contrato de compra");
+                        }
 
-            var BuyContractDTO = mapper.Map<PatchBuyContractsDTO>(BuyContract);
-            jsonPatchDocument.ApplyTo(BuyContractDTO, ModelState);
-            bool esValido = TryValidateModel(BuyContractDTO);
-            if (!esValido)
-            {
-                return BadRequest(ModelState);
+                        var BuyContractDTO = mapper.Map<PatchBuyContractsDTO>(BuyContract);
+                        jsonPatchDocument.ApplyTo(BuyContractDTO, ModelState);
+                        bool esValido = TryValidateModel(BuyContractDTO);
+                        if (!esValido)
+                        {
+                            return BadRequest(ModelState);
+                        }
+
+                        mapper.Map(BuyContractDTO, BuyContract);
+                        await context.SaveChangesAsync();
+                        return NoContent();
+                    }
+                    return HayRelacion.Result;
+                }
+                return ExisteBuyer.Result;
             }
-
-            mapper.Map(BuyContractDTO, BuyContract);
-            await context.SaveChangesAsync();
-            return NoContent();
-
+            return ExisteEstate.Result;
         }
 
 

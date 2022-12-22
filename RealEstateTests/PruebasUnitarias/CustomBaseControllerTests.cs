@@ -313,5 +313,151 @@ namespace RealEstateTests.PruebasUnitarias
             Assert.IsNotNull(codigo);
             Assert.AreEqual(404, codigo.StatusCode);
         }
+        [TestMethod]
+        public async Task DevuelveTrueSiBuyerExiste()
+        {
+            //Preparación
+            var nombreDB = Guid.NewGuid().ToString();
+            var context = ConstruirContext(nombreDB);
+            var mapper = ConfigurarAutoMapper();
+            context.Buyers.Add(new Buyer
+            {
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                IdBuyer = 1,
+                IdEstate = 1
+            });
+            await context.SaveChangesAsync();
+            var context2 = ConstruirContext(nombreDB);
+
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
+            //Prueba
+            var resultado = await controller.SaberSiExisteBuyer(1);
+
+            //Verificación
+            var respuesta = resultado.Value;
+            Assert.IsTrue(respuesta);
+        }
+        [TestMethod]
+        public async Task DevuelveNotFoundSiBuyerNoExiste()
+        {
+            //Preparación
+            var nombreDB = Guid.NewGuid().ToString();
+            var context = ConstruirContext(nombreDB);
+            var mapper = ConfigurarAutoMapper();
+            await context.SaveChangesAsync();
+
+            var controller = new CustomBaseControllerParaPruebas(context, mapper);
+            //Prueba
+            var resultado = await controller.SaberSiExisteBuyer(1);
+
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+        }
+        [TestMethod]
+        public async Task DevuelveTrueSiPropiedadYBuyerCoinciden()
+        {
+            //Preparación
+            var nombreDB = Guid.NewGuid().ToString();
+            var context = ConstruirContext(nombreDB);
+            var mapper = ConfigurarAutoMapper();
+            context.Estates.Add(new Estate
+            {
+                IdUser = "Usuario1",
+                Address = "dmkasmdkasnmdjqndjew",
+                Alias = "Casa 1",
+                City = "Bogotá",
+                Country = "Colombia",
+                IdEstate = 1,
+                KmsGround = 1500,
+                Rooms = 12,
+                Rented = false,
+                Sold = false
+            });
+            context.Buyers.Add(new Buyer
+            {
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                IdBuyer = 1,
+                IdEstate = 1
+            });
+            await context.SaveChangesAsync();
+            var context2 = ConstruirContext(nombreDB);
+
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
+            //Prueba
+            var resultado = await controller.SaberSiHayRelacionEntreBuyerYPropiedad(1, 1);
+
+            //Verificación
+            var respuesta = resultado.Value;
+            Assert.IsTrue(respuesta);
+        }
+        [TestMethod]
+        public async Task DevuelveNotFoundSiPropiedadYBuyerNoCoinciden()
+        {
+            //Preparación
+            var nombreDB = Guid.NewGuid().ToString();
+            var context = ConstruirContext(nombreDB);
+            var mapper = ConfigurarAutoMapper();
+            context.Estates.Add(new Estate
+            {
+                IdUser = "Usuario1",
+                Address = "dmkasmdkasnmdjqndjew",
+                Alias = "Casa 1",
+                City = "Bogotá",
+                Country = "Colombia",
+                IdEstate = 1,
+                KmsGround = 1500,
+                Rooms = 12,
+                Rented = false,
+                Sold = false
+            });
+            context.Buyers.Add(new Buyer
+            {
+                Dni = 1234567890,
+                Address = "dsadasds",
+                Age = 19,
+                Email = "dsadsad@gmail.com",
+                Country = "Colombia",
+                CellPhoneNumber = 4528065891,
+                FirsName = "dsads",
+                FirstSurName = "dsadadsas",
+                SecondName = "dsadasdasd",
+                SecondSurName = "dsadsdas",
+                IdBuyer = 1,
+                IdEstate = 2
+            });
+            await context.SaveChangesAsync();
+            var context2 = ConstruirContext(nombreDB);
+
+            var controller = new CustomBaseControllerParaPruebas(context2, mapper);
+            //Prueba
+            var resultado = await controller.SaberSiHayRelacionEntreBuyerYPropiedad(1, 1);
+
+            //Verificación
+            var respuesta = resultado.Result;
+            var codigo = respuesta as NotFoundObjectResult;
+            Assert.IsNotNull(codigo);
+            Assert.AreEqual(404, codigo.StatusCode);
+        }
     }
 }

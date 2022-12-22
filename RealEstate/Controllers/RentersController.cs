@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RealEstate.DTO_s.RentersDTO_s;
 using RealEstate.Models;
 using RealEstate.Utilities;
+using System.Runtime.InteropServices;
 
 namespace RealEstate.Controllers
 {
@@ -74,17 +75,18 @@ namespace RealEstate.Controllers
                 {
                     return NotFound("La propiedad no está arrendada");
                 }
-                var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == Id);
-                if (!ExistsRenter)
+                var ExisteRenter = await SaberSiExisteRenter(Id);
+                if (ExisteRenter.Value)
                 {
-                    return NotFound("No existe el Renter");
+                    var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == Id && x.IdEstate == IdEstate);
+                    if (Renter == null)
+                    {
+                        return NotFound("No hay registros de que esta persona haya arrendado esta propiedad");
+                    }
+                    return mapper.Map<GetRentersDTO>(Renter);
                 }
-                var Renter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == Id && x.IdEstate == IdEstate);
-                if (Renter == null)
-                {
-                    return NotFound("No hay registros de que esta persona haya arrendado esta propiedad");
-                }
-                return mapper.Map<GetRentersDTO>(Renter);
+                return ExisteRenter.Result;
+                    
             }
             return ExisteEstate.Result;
 
@@ -139,19 +141,19 @@ namespace RealEstate.Controllers
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
             if (ExisteEstate.Value)
             {
-                var ExistsRenter = await context.Renters.AnyAsync(x => x.IdRenter == id);
-                if (!ExistsRenter)
+                var ExisteRenter = await SaberSiExisteRenter(id);
+                if (ExisteRenter.Value)
                 {
-                    return NotFound("No existe registro del renter");
+                    var ExistsEstateInRenters = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == id && x.IdEstate == IdEstate);
+                    if (ExistsEstateInRenters == null)
+                    {
+                        return NotFound($"No hay registros que coincidan con id de la propiedad: {IdEstate}, y el id del renter: {id}.");
+                    }
+                    context.Renters.Remove(ExistsEstateInRenters);
+                    await context.SaveChangesAsync();
+                    return Ok("Renter eliminado");
                 }
-                var ExistsEstateInRenters = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == id && x.IdEstate == IdEstate);
-                if (ExistsEstateInRenters == null)
-                {
-                    return NotFound($"No hay registros que coincidan con id de la propiedad: {IdEstate}, y el id del renter: {id}.");
-                }
-                context.Renters.Remove(ExistsEstateInRenters);
-                await context.SaveChangesAsync();
-                return Ok("Renter eliminado");
+                return ExisteRenter.Result;               
             }
             return ExisteEstate.Result;
 
