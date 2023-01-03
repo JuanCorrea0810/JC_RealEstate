@@ -433,7 +433,52 @@ namespace RealEstateTests.PruebasUnitarias
             Assert.AreEqual("DNI no aceptado", respuesta.Value);
             
         }
-        
+        [TestMethod]
+        public async Task CambiarPassword()
+        {
+
+            var nombreBD = Guid.NewGuid().ToString();
+            var context = ConstruirContext(nombreBD);
+            context.Roles.Add(new IdentityRole
+            {
+                Id = "Rol1",
+                Name = "USER",
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                NormalizedName = "USER"
+            });
+            await context.SaveChangesAsync();
+            await CrearUsuarioHelper(nombreBD);
+
+            var controller = ConstruirCuentasController(nombreBD);
+            
+            //Esto se hace para poder utilizar el Id del usuario que recién se creó en la base de datos
+            var UsuarioId = await context.Users.Select(x => x.Id).FirstAsync();
+            
+            //Aqui hacemos un nuevo mock y no utilizamos el que por defecto se crea en el método donde construimos el controlador
+            var mockUser = new Mock<IGetUserInfo>();
+            mockUser.Setup(x => x.GetId()).Returns(Task.FromResult(UsuarioId));
+            
+            //Aqui gracias a la propiedad publica GetUserInfo podemos añadir un nuevo mock con diferentes especificaciones
+            //del que se inyectó por el constructor en el método que construye el controlador
+            controller.GetUserInfo = mockUser.Object;
+
+            var dto = new ChangePassword() { CurrentPassword = "Aa123456!", NewPassword = "Juancho0810!", ConfirmPassword = "Juancho0810!" };
+
+            var resultado = await controller.ChangePassword(dto);
+
+            var respuesta = resultado as OkResult;
+            Assert.IsNotNull(respuesta);
+            Assert.AreEqual(200, respuesta.StatusCode);
+
+            var Credentials = new LoginAuth() { Email = "juancorrear08102@gmail.com", Password = "Juancho0810!", RememberMe = true};
+
+            var resultado2 = await controller.LogIn(Credentials);
+            var respuesta2 = resultado2.Value;
+            Assert.IsNotNull(respuesta2);
+            Assert.IsNotNull(respuesta2.Token);
+            
+        }
+
         private async Task CrearUsuarioHelper(string nombreBD)
         {
             var controller = ConstruirCuentasController(nombreBD);

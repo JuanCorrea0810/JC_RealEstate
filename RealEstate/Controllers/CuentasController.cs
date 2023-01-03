@@ -26,7 +26,8 @@ namespace RealEstate.Controllers
         private readonly SignInManager<NewIdentityUser> signInManager;
         private readonly IAuthLog_In authgLogIn;
         private readonly IAuthSign_Up authSignUp;
-        private readonly IGetUserInfo getUserInfo;
+        
+        public IGetUserInfo GetUserInfo { get; set; }
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
 
@@ -46,7 +47,7 @@ namespace RealEstate.Controllers
             this.signInManager = signInManager;
             authgLogIn = AuthgLogIn;
             authSignUp = AuthSignUp;
-            this.getUserInfo = getUserInfo;
+            GetUserInfo = getUserInfo;
             this.mapper = mapper;
             this.emailSender = emailSender;
         }
@@ -140,7 +141,7 @@ namespace RealEstate.Controllers
         [HttpPut("CompleteProfile")]
         public async Task<ActionResult> CompleteProfile([FromBody] PutUsersDTO putUsersDTO) 
         {
-            var IdUser = await getUserInfo.GetId();
+            var IdUser = await GetUserInfo.GetId();
             var User = await userManager.FindByIdAsync(IdUser);
 
             if (User == null)
@@ -247,7 +248,7 @@ namespace RealEstate.Controllers
         {
             if (ModelState.IsValid)
             {
-                var IdUser = await getUserInfo.GetId();
+                var IdUser = await GetUserInfo.GetId();
                 var usuario = await userManager.FindByIdAsync(IdUser);
                 if (usuario == null)
                 {

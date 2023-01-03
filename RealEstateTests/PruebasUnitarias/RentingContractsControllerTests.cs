@@ -15,19 +15,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace RealEstateTests.PruebasUnitarias
 {
     [TestClass]
     public class RentingContractsControllerTests : BasePruebas
     {
+        private IMapper mapper;
+        private Mock<IGetUserInfo> mock;
+
+        [TestInitialize]
+        public Task Inicializar()
+        {
+            mapper = ConfigurarAutoMapper();
+            mock = new Mock<IGetUserInfo>();
+            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
+
+            return Task.CompletedTask;
+        }
         [TestMethod]
         public async Task DevuelveLosRentingContractsDelUsuario()
         {
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
+            
 
             context.Estates.Add(new Estate
             {
@@ -100,10 +113,7 @@ namespace RealEstateTests.PruebasUnitarias
 
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
+           
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -122,8 +132,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -157,10 +166,6 @@ namespace RealEstateTests.PruebasUnitarias
 
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -180,8 +185,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -238,10 +242,6 @@ namespace RealEstateTests.PruebasUnitarias
 
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -260,8 +260,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+           
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -302,10 +301,6 @@ namespace RealEstateTests.PruebasUnitarias
             
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -324,8 +319,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -358,10 +352,6 @@ namespace RealEstateTests.PruebasUnitarias
            
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -381,8 +371,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -423,10 +412,6 @@ namespace RealEstateTests.PruebasUnitarias
 
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -446,8 +431,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -480,10 +464,6 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
             var dto = new PostRentingContractsDTO() 
@@ -507,8 +487,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+           
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -541,10 +520,6 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
             var dto = new PostRentingContractsDTO()
@@ -570,8 +545,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
-
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -612,10 +586,6 @@ namespace RealEstateTests.PruebasUnitarias
 
             await context.SaveChangesAsync();
 
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
-
             var context2 = ConstruirContext(nombreDB);
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
@@ -636,7 +606,7 @@ namespace RealEstateTests.PruebasUnitarias
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            var mapper = ConfigurarAutoMapper();
+            
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -678,9 +648,7 @@ namespace RealEstateTests.PruebasUnitarias
             await context.SaveChangesAsync();
 
             var context2 = ConstruirContext(nombreDB);
-            var mock = new Mock<IGetUserInfo>();
-            mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
-
+ 
             var controller = new RentingContractsController(context2, mapper, mock.Object);
 
             var objectValidator = new Mock<IObjectModelValidator>();
