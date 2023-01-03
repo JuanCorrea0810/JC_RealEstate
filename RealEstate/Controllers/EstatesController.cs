@@ -190,17 +190,7 @@ namespace RealEstate.Controllers
             return Propiedad.Result;
 
         }
-        //[HttpGet(Name = "UserAndTheirEstates")]
-        //public async Task<ActionResult<List<GetEstatesDTO>>> ElUsuarioTienePropiedades(string IdUser)
-        //{
-        //    var Estates = await context.Estates.Where(x => x.IdUser == IdUser).ToListAsync();
-        //    if (Estates.Count == 0)
-        //    {
-        //        return NotFound("El usuario no ha registrado ninguna propiedad");
-        //    }
-        //    return mapper.Map<List<GetEstatesDTO>>(Estates);
-        //}
-
+        
 
     }
 }

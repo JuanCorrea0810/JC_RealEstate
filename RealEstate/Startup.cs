@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RealEstate.Models;
 using RealEstate.Models.Auth;
 using RealEstate.Servicios;
 using RealEstate.Utilities;
+using RealEstate.Utilities.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -102,11 +104,10 @@ namespace RealEstate
 
             services.AddAuthorization();
 
-            services.AddScoped<TokenAuthSignUp>();
-            services.AddScoped<TokenAuthLogIn>();
+            services.AddScoped<IAuthSign_Up,TokenAuthSignUp>();
+            services.AddScoped<IAuthLog_In, TokenAuthLogIn>();
             services.AddTransient<IGetUserInfo,GetUserInfo>();
             services.AddScoped<IEmailSender, MailJetEmailSender>();
-            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

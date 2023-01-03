@@ -62,7 +62,7 @@ namespace RealEstate.Controllers
         }
 
         [HttpPost("AddToRole")]
-        public async Task<ActionResult> AddToRolee([FromQuery] string IdUser, [FromBody] string RoleName)
+        public async Task<ActionResult> AddToRole([FromQuery] string IdUser, [FromBody] string RoleName)
         {
             var rol = await roleManager.FindByNameAsync(RoleName);
             if (rol == null)

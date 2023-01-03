@@ -1,13 +1,14 @@
 ﻿using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using RealEstate.Utilities.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace RealEstate.Models.Auth
 {
-    public class TokenAuthSignUp
+    public class TokenAuthSignUp: IAuthSign_Up
 
     {
         private readonly IConfiguration configuration;

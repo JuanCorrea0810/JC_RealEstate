@@ -22,8 +22,8 @@ namespace PeliculasAPI.Tests
 {
     public class BasePruebas
     {
-        protected string usuarioPorDefectoId = "9722b56a-77ea-4e41-941d-e319b6eb3712";
-        protected string usuarioPorDefectoEmail = "ejemplo@hotmail.com";
+        //protected string usuarioPorDefectoId = "9722b56a-77ea-4e41-941d-e319b6eb3712";
+        //protected string usuarioPorDefectoEmail = "ejemplo@hotmail.com";
 
         protected RealEstateProjectContext ConstruirContext(string nombreDB)
         {
@@ -63,51 +63,6 @@ namespace PeliculasAPI.Tests
             return false;
         }
 
-        
-
-        //private UserManager<TUser> BuildUserManager<TUser>(IUserStore<TUser> store = null) where TUser : class
-        //{
-        //    store = store ?? new Mock<IUserStore<TUser>>().Object;
-        //    var options = new Mock<IOptions<IdentityOptions>>();
-        //    var idOptions = new IdentityOptions();
-        //    idOptions.Lockout.AllowedForNewUsers = false;
-
-        //    options.Setup(o => o.Value).Returns(idOptions);
-
-        //    var userValidators = new List<IUserValidator<TUser>>();
-
-        //    var validator = new Mock<IUserValidator<TUser>>();
-        //    userValidators.Add(validator.Object);
-        //    var pwdValidators = new List<PasswordValidator<TUser>>();
-        //    pwdValidators.Add(new PasswordValidator<TUser>());
-
-        //    var userManager = new UserManager<TUser>(store, options.Object, new PasswordHasher<TUser>(),
-        //        userValidators, pwdValidators, new UpperInvariantLookupNormalizer(),
-        //        new IdentityErrorDescriber(), null,
-        //        new Mock<ILogger<UserManager<TUser>>>().Object);
-
-        //    validator.Setup(v => v.ValidateAsync(userManager, It.IsAny<TUser>()))
-        //        .Returns(Task.FromResult(IdentityResult.Success)).Verifiable();
-
-        //    return userManager;
-        //}
-
-        //private static SignInManager<TUser> SetupSignInManager<TUser>(UserManager<TUser> manager,
-        //    HttpContext context, ILogger logger = null, IdentityOptions identityOptions = null,
-        //    IAuthenticationSchemeProvider schemeProvider = null) where TUser : class
-        //{
-        //    var contextAccessor = new Mock<IHttpContextAccessor>();
-        //    contextAccessor.Setup(a => a.HttpContext).Returns(context);
-        //    identityOptions = identityOptions ?? new IdentityOptions();
-        //    var options = new Mock<IOptions<IdentityOptions>>();
-        //    options.Setup(a => a.Value).Returns(identityOptions);
-        //    var claimsFactory = new UserClaimsPrincipalFactory<TUser>(manager, options.Object);
-        //    schemeProvider = schemeProvider ?? new Mock<IAuthenticationSchemeProvider>().Object;
-        //    var sm = new SignInManager<TUser>(manager, contextAccessor.Object, claimsFactory, options.Object, null, schemeProvider, new DefaultUserConfirmation<TUser>());
-        //    sm.Logger = logger ?? (new Mock<ILogger<SignInManager<TUser>>>()).Object;
-        //    return sm;
-        //}
-
         //protected ControllerContext ConstruirControllerContext()
         //{
         //    var usuario = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
@@ -140,7 +95,7 @@ namespace PeliculasAPI.Tests
         //                services.Remove(descriptorDBContext);
         //            }
 
-        //            services.AddDbContext<ApplicationDbContext>(options => 
+        //            services.AddDbContext<ApplicationDbContext>(options =>
         //            options.UseInMemoryDatabase(nombreBD));
 
         //            if (ignorarSeguridad)
@@ -157,5 +112,65 @@ namespace PeliculasAPI.Tests
 
         //    return factory;
         //}
+
+        // Source: https://github.com/dotnet/aspnetcore/blob/master/src/Identity/test/Shared/MockHelpers.cs
+        // Source: https://github.com/dotnet/aspnetcore/blob/master/src/Identity/test/Identity.Test/SignInManagerTest.cs
+        protected UserManager<TUser> BuildUserManager<TUser>(IUserStore<TUser> store = null) where TUser : class
+        {
+            store = store ?? new Mock<IUserStore<TUser>>().Object;
+            var options = new Mock<IOptions<IdentityOptions>>();
+            var idOptions = new IdentityOptions();
+            idOptions.Lockout.AllowedForNewUsers = true;
+            idOptions.Password.RequireNonAlphanumeric = false;
+            idOptions.Lockout.MaxFailedAccessAttempts = 6;
+            idOptions.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
+
+            options.Setup(o => o.Value).Returns(idOptions);
+
+            var userValidators = new List<IUserValidator<TUser>>();
+
+            var validator = new Mock<IUserValidator<TUser>>();
+            userValidators.Add(validator.Object);
+            var pwdValidators = new List<PasswordValidator<TUser>>();
+            pwdValidators.Add(new PasswordValidator<TUser>());
+
+            var userManager = new UserManager<TUser>(store, options.Object, new PasswordHasher<TUser>(),
+                userValidators, pwdValidators, new UpperInvariantLookupNormalizer(),
+                new IdentityErrorDescriber(), null,
+                new Mock<ILogger<UserManager<TUser>>>().Object);
+
+            validator.Setup(v => v.ValidateAsync(userManager, It.IsAny<TUser>()))
+                .Returns(Task.FromResult(IdentityResult.Success)).Verifiable();
+
+            return userManager;
+        }
+
+        protected static SignInManager<TUser> SetupSignInManager<TUser>(UserManager<TUser> manager,
+            HttpContext context, ILogger logger = null, IdentityOptions identityOptions = null,
+            IAuthenticationSchemeProvider schemeProvider = null) where TUser : class
+        {
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            contextAccessor.Setup(a => a.HttpContext).Returns(context);
+            identityOptions = identityOptions ?? new IdentityOptions();
+            var options = new Mock<IOptions<IdentityOptions>>();
+            options.Setup(a => a.Value).Returns(identityOptions);
+            var claimsFactory = new UserClaimsPrincipalFactory<TUser>(manager, options.Object);
+            schemeProvider = schemeProvider ?? new Mock<IAuthenticationSchemeProvider>().Object;
+            var sm = new SignInManager<TUser>(manager, contextAccessor.Object, claimsFactory, options.Object, null, schemeProvider, new DefaultUserConfirmation<TUser>());
+            sm.Logger = logger ?? (new Mock<ILogger<SignInManager<TUser>>>()).Object;
+            return sm;
+        }
+        protected static RoleManager<TRole> BuildRoleManager<TRole>(IRoleStore<TRole> store = null) where TRole : class
+        {
+            store = store ?? new Mock<IRoleStore<TRole>>().Object;
+            var roles = new List<IRoleValidator<TRole>>();
+            roles.Add(new RoleValidator<TRole>());
+            return new RoleManager<TRole>(store, roles,
+                null,
+                new IdentityErrorDescriber(),
+                null);
+        }
+
+        
     }
 }

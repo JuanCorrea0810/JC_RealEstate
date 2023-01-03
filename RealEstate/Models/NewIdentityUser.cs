@@ -6,29 +6,29 @@ namespace RealEstate.Models
 {
     public class NewIdentityUser : IdentityUser
     {
-        [Required]
+        
         public long Dni { get; set; }
         
-        [Required]
-        public string FirstName { get; set; } = null!;
+        
+        public string FirstName { get; set; } 
 
         
         public string SecondName { get; set; }
 
         
-        [Required]
-        public string FirstSurName { get; set; } = null!;
+        
+        public string FirstSurName { get; set; } 
 
         
-        public string SecondSurName { get; set; } = null!;
+        public string SecondSurName { get; set; } 
 
-        [Required]
+       
         
-        public string Country { get; set; } = null!;
+        public string Country { get; set; } 
 
         
 
-        public string Address { get; set; } = null!;
+        public string Address { get; set; } 
 
         [Range(1, 130, ErrorMessage = "Se debe ingresar un valor entre {1} y {2}")]
         public int? Age { get; set; }

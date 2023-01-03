@@ -10,6 +10,7 @@ using RealEstate.DTO_s.UsersDTO_s;
 using RealEstate.Models;
 using RealEstate.Models.Auth;
 using RealEstate.Utilities;
+using RealEstate.Utilities.Auth;
 using System.Security.Claims;
 
 namespace RealEstate.Controllers
@@ -23,9 +24,8 @@ namespace RealEstate.Controllers
         private readonly UserManager<NewIdentityUser> userManager;
         private readonly RealEstateProjectContext context;
         private readonly SignInManager<NewIdentityUser> signInManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly TokenAuthLogIn authgLogIn;
-        private readonly TokenAuthSignUp authSignUp;
+        private readonly IAuthLog_In authgLogIn;
+        private readonly IAuthSign_Up authSignUp;
         private readonly IGetUserInfo getUserInfo;
         private readonly IMapper mapper;
         private readonly IEmailSender emailSender;
@@ -33,9 +33,8 @@ namespace RealEstate.Controllers
         public CuentasController(UserManager<NewIdentityUser> userManager, 
             RealEstateProjectContext context,
             SignInManager<NewIdentityUser> signInManager,
-            RoleManager<IdentityRole> roleManager,
-            TokenAuthLogIn AuthgLogIn,
-            TokenAuthSignUp AuthSignUp,
+            IAuthLog_In AuthgLogIn,
+            IAuthSign_Up AuthSignUp,
             IGetUserInfo getUserInfo,
             IMapper mapper,
             IEmailSender emailSender
@@ -45,7 +44,6 @@ namespace RealEstate.Controllers
             this.userManager = userManager;
             this.context = context;
             this.signInManager = signInManager;
-            this.roleManager = roleManager;
             authgLogIn = AuthgLogIn;
             authSignUp = AuthSignUp;
             this.getUserInfo = getUserInfo;
