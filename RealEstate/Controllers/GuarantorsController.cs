@@ -54,26 +54,23 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Guarantors = await context.Guarantors.Where(x => x.IdRenter == IdRenter).ToListAsync();
+            if (Guarantors.Count == 0)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var Guarantors = await context.Guarantors.Where(x => x.IdRenter == IdRenter).ToListAsync();
-                        if (Guarantors.Count == 0)
-                        {
-                            return NotFound("El Renter no tiene Guarantors registrados");
-                        }
-                        return mapper.Map<List<GetGuarantorDTO>>(Guarantors);
-                    }
-                    return HayRelacion.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("El Renter no tiene Guarantors registrados");
             }
-            return ExisteEstate.Result;
+            return mapper.Map<List<GetGuarantorDTO>>(Guarantors);
 
         }
 
@@ -82,70 +79,60 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
-            {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
-                        if (ExisteGuarantor.Value)
-                        {
-                            var Guarantor_Renter = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
-                            if (Guarantor_Renter == null)
-                            {
-                                return NotFound("No existe relacion entre este fiador y este Renter");
-                            }
-                            return mapper.Map<GetGuarantorDTO>(Guarantor_Renter);
-                        }
-                        return ExisteGuarantor.Result;
-                    }
-                    return HayRelacion.Result;
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
 
-                }
-                return ExisteRenter.Result;
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
+            if (!ExisteGuarantor.Value)
+            { return ExisteGuarantor.Result; }
+
+            var Guarantor_Renter = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
+            if (Guarantor_Renter == null)
+            {
+                return NotFound("No existe relacion entre este fiador y este Renter");
             }
-            return ExisteEstate.Result;
+            return mapper.Map<GetGuarantorDTO>(Guarantor_Renter);
 
         }
-
-
-
 
         [HttpPost]
         public async Task<ActionResult> Post(PostGuarantorDTO postGuarantorDTO, [FromRoute] int IdRenter, [FromRoute] int IdEstate)
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExistsGuarantorWithSameDNI = await context.Guarantors.AnyAsync(x => x.IdRenter == IdRenter && x.Dni == postGuarantorDTO.Dni);
-                        if (ExistsGuarantorWithSameDNI)
-                        {
-                            return BadRequest($"Ya existe un Fiador para este renter con el DNI: {postGuarantorDTO.Dni}");
-                        }
-                        var guarantor = mapper.Map<Guarantor>(postGuarantorDTO);
-                        guarantor.IdRenter = IdRenter;
-                        context.Add(guarantor);
-                        await context.SaveChangesAsync();
-
-                        var GuarantorDTO = mapper.Map<GetGuarantorDTO>(guarantor);
-                        return CreatedAtRoute("GetGuarantor", new { IdEstate = IdEstate, IdRenter = IdRenter, Id = guarantor.IdGuarantor }, GuarantorDTO);
-                    }
-                    return HayRelacion.Result;
-
-                }
                 return ExisteRenter.Result;
             }
-            return ExisteEstate.Result;
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExistsGuarantorWithSameDNI = await context.Guarantors.AnyAsync(x => x.IdRenter == IdRenter && x.Dni == postGuarantorDTO.Dni);
+            if (ExistsGuarantorWithSameDNI)
+            {
+                return BadRequest($"Ya existe un Fiador para este renter con el DNI: {postGuarantorDTO.Dni}");
+            }
+            var guarantor = mapper.Map<Guarantor>(postGuarantorDTO);
+            guarantor.IdRenter = IdRenter;
+            context.Add(guarantor);
+            await context.SaveChangesAsync();
+
+            var GuarantorDTO = mapper.Map<GetGuarantorDTO>(guarantor);
+            return CreatedAtRoute("GetGuarantor", new { IdEstate = IdEstate, IdRenter = IdRenter, Id = guarantor.IdGuarantor }, GuarantorDTO);
 
         }
 
@@ -156,35 +143,30 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
+            if (!ExisteGuarantor.Value)
+            { return ExisteGuarantor.Result; }
+
+            var ExistsRenter_Guarantor = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
+            if (ExistsRenter_Guarantor == null)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
-                        if (ExisteGuarantor.Value)
-                        {
-                            var ExistsRenter_Guarantor = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
-                            if (ExistsRenter_Guarantor == null)
-                            {
-                                return NotFound("No existe registro que vincule a este fiador con este Renter");
-                            }
-
-                            context.Guarantors.Remove(ExistsRenter_Guarantor);
-                            await context.SaveChangesAsync();
-                            return Ok("Fiador eliminado");
-                        }
-                        return ExisteGuarantor.Result;
-                    }
-                    return HayRelacion.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe registro que vincule a este fiador con este Renter");
             }
-            return ExisteEstate.Result;
 
+            context.Guarantors.Remove(ExistsRenter_Guarantor);
+            await context.SaveChangesAsync();
+            return Ok("Fiador eliminado");
         }
 
         [HttpPatch("{Id:int}")]
@@ -196,37 +178,33 @@ namespace RealEstate.Controllers
             }
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
+            if (!ExisteGuarantor.Value)
+            { return ExisteGuarantor.Result; }
+
+            var Guarantor_Renter = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
+            if (Guarantor_Renter == null)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var ExisteGuarantor = await SaberSiExisteGuarantor(Id);
-                    if (ExisteGuarantor.Value)
-                    {
-                        var Guarantor_Renter = await context.Guarantors.FirstOrDefaultAsync(x => x.IdGuarantor == Id && x.IdRenter == IdRenter);
-                        if (Guarantor_Renter == null)
-                        {
-                            return NotFound("No existe relacion entre este fiador y este Renter");
-                        }
-                        var GuarantorDTO = mapper.Map<PatchGuarantorsDTO>(Guarantor_Renter);
-                        jsonPatchDocument.ApplyTo(GuarantorDTO, ModelState);
-                        bool esValido = TryValidateModel(GuarantorDTO);
-                        if (!esValido)
-                        {
-                            return BadRequest(ModelState);
-                        }
-
-                        mapper.Map(GuarantorDTO, Guarantor_Renter);
-                        await context.SaveChangesAsync();
-                        return NoContent();
-
-                    }
-                    return ExisteGuarantor.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe relacion entre este fiador y este Renter");
             }
-            return ExisteEstate.Result;
+            var GuarantorDTO = mapper.Map<PatchGuarantorsDTO>(Guarantor_Renter);
+            jsonPatchDocument.ApplyTo(GuarantorDTO, ModelState);
+            bool esValido = TryValidateModel(GuarantorDTO);
+            if (!esValido)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(GuarantorDTO, Guarantor_Renter);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

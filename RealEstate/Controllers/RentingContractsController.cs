@@ -20,7 +20,7 @@ namespace RealEstate.Controllers
         private readonly IGetUserInfo getUser;
 
         public RentingContractsController(RealEstateProjectContext context, IMapper mapper,
-            IGetUserInfo getUser):base(context,mapper)
+            IGetUserInfo getUser) : base(context, mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -53,27 +53,23 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var RentingContracts = await context.Rentingcontracts.Where(x => x.IdRenter == IdRenter && x.IdEst == IdEstate).ToListAsync();
+            if (RentingContracts.Count == 0)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate,IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var RentingContracts = await context.Rentingcontracts.Where(x => x.IdRenter == IdRenter && x.IdEst == IdEstate).ToListAsync();
-                        if (RentingContracts.Count == 0)
-                        {
-                            return NotFound("No existe ningpun contrato de arrendamiento registrado");
-                        }
-                        return mapper.Map<List<GetRentingContractsDTO>>(RentingContracts);
-                    }
-                    return HayRelacion.Result;
-                    
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe ningpun contrato de arrendamiento registrado");
             }
-            return ExisteEstate.Result;
+            return mapper.Map<List<GetRentingContractsDTO>>(RentingContracts);
         }
 
         [HttpGet("{id:int}", Name = "GetRentingContract")]
@@ -81,32 +77,29 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == id);
+            if (!ExistsContract)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == id);
-                        if (!ExistsContract)
-                        {
-                            return NotFound("No existe dicho contrato");
-                        }
-                        var RentingContracts = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == id);
-                        if (RentingContracts == null)
-                        {
-                            return NotFound("Este contrato no está asociado a este renter");
-                        }
-                        return mapper.Map<GetRentingContractsDTO>(RentingContracts);
-                    }
-                    return HayRelacion.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe dicho contrato");
             }
-            return ExisteEstate.Result;
-                        
+            var RentingContracts = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == id);
+            if (RentingContracts == null)
+            {
+                return NotFound("Este contrato no está asociado a este renter");
+            }
+            return mapper.Map<GetRentingContractsDTO>(RentingContracts);
+
         }
 
 
@@ -116,32 +109,32 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
-            {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var ExistsEstateInRenter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEstate == IdEstate);
-                    if (ExistsEstateInRenter == null)
-                    {
-                        return NotFound("El Renter no coincide con esta propiedad");
-                    }
-                    if (ExistsEstateInRenter.Active == false)
-                    {
-                        return BadRequest("No se puede agregar un contrato de arrendamiento a un Renter que no está activo");
-                    }
-                    var RentingContracts = mapper.Map<Rentingcontract>(postRentingContract);
-                    RentingContracts.IdEst = IdEstate;
-                    RentingContracts.IdRenter = IdRenter;
-                    context.Add(RentingContracts);
-                    await context.SaveChangesAsync();
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
 
-                    var RentingContractDTO = mapper.Map<GetRentingContractsDTO>(RentingContracts);
-                    return CreatedAtRoute("GetRentingContract", new { IdEstate = IdEstate, IdRenter = IdRenter, Id = RentingContracts.IdRentingContract }, RentingContractDTO);
-                }
-                return ExisteRenter.Result;
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var ExistsEstateInRenter = await context.Renters.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEstate == IdEstate);
+            if (ExistsEstateInRenter == null)
+            {
+                return NotFound("El Renter no coincide con esta propiedad");
             }
-            return ExisteEstate.Result;
+            if (ExistsEstateInRenter.Active == false)
+            {
+                return BadRequest("No se puede agregar un contrato de arrendamiento a un Renter que no está activo");
+            }
+            var RentingContracts = mapper.Map<Rentingcontract>(postRentingContract);
+            RentingContracts.IdEst = IdEstate;
+            RentingContracts.IdRenter = IdRenter;
+            context.Add(RentingContracts);
+            await context.SaveChangesAsync();
+
+            var RentingContractDTO = mapper.Map<GetRentingContractsDTO>(RentingContracts);
+            return CreatedAtRoute("GetRentingContract", new { IdEstate = IdEstate, IdRenter = IdRenter, Id = RentingContracts.IdRentingContract }, RentingContractDTO);
+
+
 
         }
 
@@ -150,34 +143,31 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == id);
+            if (!ExistsContract)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == id);
-                        if (!ExistsContract)
-                        {
-                            return NotFound("No existe dicho contrato");
-                        }
-                        var RentingContracts = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == id);
-                        if (RentingContracts == null)
-                        {
-                            return NotFound("El contrato no está asociado a este renter");
-                        }
-                        context.Rentingcontracts.Remove(RentingContracts);
-                        await context.SaveChangesAsync();
-                        return Ok("Contrato eliminado");
-                    }
-                    return HayRelacion.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe dicho contrato");
             }
-            return ExisteEstate.Result;
-                        
+            var RentingContracts = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == id);
+            if (RentingContracts == null)
+            {
+                return NotFound("El contrato no está asociado a este renter");
+            }
+            context.Rentingcontracts.Remove(RentingContracts);
+            await context.SaveChangesAsync();
+            return Ok("Contrato eliminado");
+
         }
 
         [HttpPatch("{Id:int}")]
@@ -190,44 +180,40 @@ namespace RealEstate.Controllers
 
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteRenter = await SaberSiExisteRenter(IdRenter);
+            if (!ExisteRenter.Value)
+            { return ExisteRenter.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == Id);
+            if (!ExistsContract)
             {
-                var ExisteRenter = await SaberSiExisteRenter(IdRenter);
-                if (ExisteRenter.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreRenterYEstate(IdEstate, IdRenter);
-                    if (HayRelacion.Value)
-                    {
-                        var ExistsContract = await context.Rentingcontracts.AnyAsync(x => x.IdRentingContract == Id);
-                        if (!ExistsContract)
-                        {
-                            return NotFound("No existe dicho contrato");
-                        }
-                        var RentingContract = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == Id);
-                        if (RentingContract == null)
-                        {
-                            return NotFound("El contrato no está asociado a este renter");
-                        }
-
-
-                        var RentingContractDTO = mapper.Map<PatchRentingContractsDTO>(RentingContract);
-                        jsonPatchDocument.ApplyTo(RentingContractDTO, ModelState);
-                        bool esValido = TryValidateModel(RentingContractDTO);
-                        if (!esValido)
-                        {
-                            return BadRequest(ModelState);
-                        }
-
-                        mapper.Map(RentingContractDTO, RentingContract);
-                        await context.SaveChangesAsync();
-                        return NoContent();
-
-                    }
-                    return HayRelacion.Result;
-                }
-                return ExisteRenter.Result;
+                return NotFound("No existe dicho contrato");
             }
-            return ExisteEstate.Result;
+            var RentingContract = await context.Rentingcontracts.FirstOrDefaultAsync(x => x.IdRenter == IdRenter && x.IdEst == IdEstate && x.IdRentingContract == Id);
+            if (RentingContract == null)
+            {
+                return NotFound("El contrato no está asociado a este renter");
+            }
+
+
+            var RentingContractDTO = mapper.Map<PatchRentingContractsDTO>(RentingContract);
+            jsonPatchDocument.ApplyTo(RentingContractDTO, ModelState);
+            bool esValido = TryValidateModel(RentingContractDTO);
+            if (!esValido)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(RentingContractDTO, RentingContract);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
 
     }

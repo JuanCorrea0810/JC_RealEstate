@@ -55,30 +55,23 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
+            if (!ExisteMortgage.Value)
+            { return ExisteMortgage.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Payments = await context.Payments.Where(x => x.IdMortgage == IdMortgage).ToListAsync();
+            if (Payments.Count == 0)
             {
-                var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
-                if (ExisteMortgage.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
-                    if (HayRelacion.Value)
-                    {
-                        var Payments = await context.Payments.Where(x => x.IdMortgage == IdMortgage).ToListAsync();
-                        if (Payments.Count == 0)
-                        {
-                            return NotFound("No se han registrado pagos a la hipoteca");
-                        }
-                        return mapper.Map<List<GetPaymentsDTO>>(Payments);
-                    }
-                    return HayRelacion.Result;
-
-                }
-                return ExisteMortgage.Result;
-
+                return NotFound("No se han registrado pagos a la hipoteca");
             }
-            return ExisteEstate.Result;
-
-
+            return mapper.Map<List<GetPaymentsDTO>>(Payments);
         }
 
         [HttpGet("{IdPayments:int}", Name = "GetPayment")]
@@ -86,32 +79,24 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
+            if (!ExisteMortgage.Value)
+            { return ExisteMortgage.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == IdPayments && x.IdMortgage == IdMortgage);
+            if (Payment == null)
             {
-                var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
-                if (ExisteMortgage.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
-                    if (HayRelacion.Value)
-                    {
-                        var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == IdPayments && x.IdMortgage == IdMortgage);
-                        if (Payment == null)
-                        {
-                            return NotFound("Dicho pago no se ha registrado");
-                        }
-                        return mapper.Map<GetPaymentsDTO>(Payment);
-                    }
-                    return HayRelacion.Result;
-
-                }
-                return ExisteMortgage.Result;
-
+                return NotFound("Dicho pago no se ha registrado");
             }
-            return ExisteEstate.Result;
-
+            return mapper.Map<GetPaymentsDTO>(Payment);
         }
-
-
 
         [HttpPost]
         public async Task<ActionResult> Post(PostPaymentsDTO postPayment, [FromRoute] int IdMortgage, int IdEstate)
@@ -119,28 +104,23 @@ namespace RealEstate.Controllers
 
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
-            {
-                var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
-                if (ExisteMortgage.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
-                    if (HayRelacion.Value)
-                    {
-                        var Payment = mapper.Map<Payment>(postPayment);
-                        Payment.IdMortgage = IdMortgage;
-                        context.Add(Payment);
-                        await context.SaveChangesAsync();
-                        var PaymentDTO = mapper.Map<GetPaymentsDTO>(Payment);
-                        return CreatedAtRoute("GetPayment", new { IdEstate = IdEstate, IdMortgage = IdMortgage, IdPayments = Payment.IdPayments }, PaymentDTO);
-                    }
-                    return HayRelacion.Result;
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
 
-                }
-                return ExisteMortgage.Result;
-            }
-            return ExisteEstate.Result;
+            var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
+            if (!ExisteMortgage.Value)
+            { return ExisteMortgage.Result; }
 
+            var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Payment = mapper.Map<Payment>(postPayment);
+            Payment.IdMortgage = IdMortgage;
+            context.Add(Payment);
+            await context.SaveChangesAsync();
+            var PaymentDTO = mapper.Map<GetPaymentsDTO>(Payment);
+            return CreatedAtRoute("GetPayment", new { IdEstate = IdEstate, IdMortgage = IdMortgage, IdPayments = Payment.IdPayments }, PaymentDTO);
         }
 
         [HttpDelete("{id:int}")]
@@ -148,30 +128,25 @@ namespace RealEstate.Controllers
         {
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
+            if (!ExisteMortgage.Value)
+            { return ExisteMortgage.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == id && x.IdMortgage == IdMortgage);
+            if (Payment == null)
             {
-                var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
-                if (ExisteMortgage.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
-                    if (HayRelacion.Value)
-                    {
-                        var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == id && x.IdMortgage == IdMortgage);
-                        if (Payment == null)
-                        {
-                            return NotFound("Dicho pago no se ha registrado");
-                        }
-                        context.Payments.Remove(Payment);
-                        await context.SaveChangesAsync();
-                        return Ok("Registro eliminado");
-                    }
-                    return HayRelacion.Result;
-
-                }
-                return ExisteMortgage.Result;
+                return NotFound("Dicho pago no se ha registrado");
             }
-            return ExisteEstate.Result;
-
+            context.Payments.Remove(Payment);
+            await context.SaveChangesAsync();
+            return Ok("Registro eliminado");
         }
 
         [HttpPatch("{id:int}")]
@@ -184,38 +159,34 @@ namespace RealEstate.Controllers
 
             var IdUser = await getUser.GetId();
             var ExisteEstate = await SaberSiExistePropiedad(IdUser, IdEstate);
-            if (ExisteEstate.Value)
+            if (!ExisteEstate.Value)
+            { return ExisteEstate.Result; }
+
+            var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
+            if (!ExisteMortgage.Value)
+            { return ExisteMortgage.Result; }
+
+            var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
+            if (!HayRelacion.Value)
+            { return HayRelacion.Result; }
+
+            var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == id && x.IdMortgage == IdMortgage);
+            if (Payment == null)
             {
-                var ExisteMortgage = await SaberSiExisteMortgage(IdEstate);
-                if (ExisteMortgage.Value)
-                {
-                    var HayRelacion = await SaberSiHayRelacionEntreHipotecaYPropiedad(IdEstate, IdMortgage);
-                    if (HayRelacion.Value)
-                    {
-                        var Payment = await context.Payments.FirstOrDefaultAsync(x => x.IdPayments == id && x.IdMortgage == IdMortgage);
-                        if (Payment == null)
-                        {
-                            return NotFound("Dicho pago no se ha registrado");
-                        }
-
-                        var PaymentDTO = mapper.Map<PatchPaymentsDTO>(Payment);
-                        jsonPatchDocument.ApplyTo(PaymentDTO, ModelState);
-                        bool esValido = TryValidateModel(PaymentDTO);
-                        if (!esValido)
-                        {
-                            return BadRequest(ModelState);
-                        }
-
-                        mapper.Map(PaymentDTO, Payment);
-                        await context.SaveChangesAsync();
-                        return NoContent();
-                    }
-                    return HayRelacion.Result;
-
-                }
-                return ExisteMortgage.Result;
+                return NotFound("Dicho pago no se ha registrado");
             }
-            return ExisteEstate.Result;
+
+            var PaymentDTO = mapper.Map<PatchPaymentsDTO>(Payment);
+            jsonPatchDocument.ApplyTo(PaymentDTO, ModelState);
+            bool esValido = TryValidateModel(PaymentDTO);
+            if (!esValido)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(PaymentDTO, Payment);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
