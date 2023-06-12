@@ -173,8 +173,6 @@ namespace RealEstate.Controllers
 
         [AllowAnonymous]
         [HttpPost("ForgetPassword")]
-        //TO-DO: No debe regresar el token ya que es un error de seguridad, hay que crear vistas
-
         public async Task<ActionResult<string>> ForgetPassword(ForgetPassword emailDTO) 
         {
             if (ModelState.IsValid)
@@ -189,8 +187,8 @@ namespace RealEstate.Controllers
                 var urlRetorno = Url.Action("ResetPassword", "User", new { userId = usuario.Id, code = codigo }, protocol: HttpContext.Request.Scheme);
 
                 await emailSender.SendEmailAsync(emailDTO.Email, "Recuperar contraseña - JuanCorrea",
-                    "Por favor recupere su contraseña dando click aquí: <a href=\"" + urlRetorno + "\">enlace</a>");
-                return codigo;
+                    "Por favor recupere su contraseña haciendo una petición POST aquí: <a href=\"" + urlRetorno + "\">enlace</a>");
+                return "Se ha enviado un correo de recuperación de contraseña, por favor revise su bandeja de entrada o su carpeta de spam";
             }
 
             return BadRequest(ModelState);

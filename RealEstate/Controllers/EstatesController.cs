@@ -29,7 +29,7 @@ namespace RealEstate.Controllers
             this.getUser = getUser;
         }
 
-        [AllowAnonymous]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Owner,Admin")]
         [HttpGet("ListOfEstates")]
         public async Task<ActionResult<List<GetEstatesDTO>>> GetAllEstates()
         {
