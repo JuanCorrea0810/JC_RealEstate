@@ -104,6 +104,16 @@ namespace RealEstate
 
             services.AddAuthorization();
 
+            services.AddCors(options => 
+            {
+                options.AddPolicy("Generic", policy => 
+                {
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyOrigin();
+                });
+            });
+
             services.AddScoped<IAuthSign_Up,TokenAuthSignUp>();
             services.AddScoped<IAuthLog_In, TokenAuthLogIn>();
             services.AddTransient<IGetUserInfo,GetUserInfo>();
@@ -120,15 +130,10 @@ namespace RealEstate
             }
 
             app.UseHttpsRedirection();
-         
-
-
             app.UseRouting();
-
+            app.UseCors("Generic");
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
