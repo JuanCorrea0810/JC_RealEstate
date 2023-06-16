@@ -54,7 +54,7 @@ namespace RealEstate.Controllers
 
         [AllowAnonymous]
         [HttpPost("SignUp")]
-        public async Task<ActionResult<ResponseAuth>> Sign_Up(InfoUser credentials) 
+        public async Task<ActionResult<ResponseAuth>> Sign_Up([FromBody] InfoUser credentials) 
         {
             if (ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace RealEstate.Controllers
         [AllowAnonymous]
         [HttpPost("LogIn")]
         
-        public async Task<ActionResult<ResponseAuth>> LogIn(LoginAuth credentials)
+        public async Task<ActionResult<ResponseAuth>> LogIn([FromBody]LoginAuth credentials)
         {
             if (ModelState.IsValid)
             {
@@ -131,7 +131,6 @@ namespace RealEstate.Controllers
         }
 
         [HttpPost("LogOut")]
-
         public async Task<ActionResult> LogOut()
         {
             await signInManager.SignOutAsync();
@@ -173,7 +172,7 @@ namespace RealEstate.Controllers
 
         [AllowAnonymous]
         [HttpPost("ForgetPassword")]
-        public async Task<ActionResult<string>> ForgetPassword(ForgetPassword emailDTO) 
+        public async Task<ActionResult<string>> ForgetPassword([FromBody]ForgetPassword emailDTO) 
         {
             if (ModelState.IsValid)
             {
@@ -223,7 +222,7 @@ namespace RealEstate.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery]string IdUser, [FromQuery] string code)
         {
-            
+
             if (IdUser == null || code == null)
             {
                 return BadRequest();

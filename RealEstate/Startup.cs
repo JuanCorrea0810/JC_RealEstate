@@ -10,6 +10,12 @@ using RealEstate.Models.Auth;
 using RealEstate.Servicios;
 using RealEstate.Utilities;
 using RealEstate.Utilities.Auth;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -28,7 +34,10 @@ namespace RealEstate
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson().
+            services.AddControllers(options => 
+            {
+                options.Filters.Add(typeof(ExceptionCatcherFiltrer));
+            }).AddNewtonsoftJson().
                 AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -118,6 +127,37 @@ namespace RealEstate
             services.AddScoped<IAuthLog_In, TokenAuthLogIn>();
             services.AddTransient<IGetUserInfo,GetUserInfo>();
             services.AddScoped<IEmailSender, MailJetEmailSender>();
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddSerilog();
+            });
+
+            var logConnectionString = Configuration.GetConnectionString("LogErrors");
+            var columnOptions = new ColumnOptions()
+            {
+                AdditionalColumns = new Collection<SqlColumn>
+                {
+                    new SqlColumn("TypeException",SqlDbType.VarChar),
+                    new SqlColumn("Source",SqlDbType.VarChar),
+                    new SqlColumn("StackTrace",SqlDbType.VarChar),
+                    new SqlColumn("HelpLink",SqlDbType.VarChar),
+                    new SqlColumn("Place",SqlDbType.VarChar),
+                    new SqlColumn("TypeMember",SqlDbType.VarChar),
+                    new SqlColumn("IP",SqlDbType.VarChar),
+                    new SqlColumn("QueryString",SqlDbType.VarChar),
+                    new SqlColumn("RouteValues",SqlDbType.VarChar)
+                }
+            };
+
+            Log.Logger = new LoggerConfiguration().
+                Enrich.FromLogContext().
+                WriteTo.MSSqlServer(logConnectionString, sinkOptions: new SinkOptions
+                {
+                    TableName = "LogErrors",
+                    AutoCreateSqlTable = true
+                }, null, null, LogEventLevel.Error, null, columnOptions: columnOptions, null, null).
+                MinimumLevel.Override("Microsoft", LogEventLevel.Error).
+                CreateLogger();            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -128,7 +168,7 @@ namespace RealEstate
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("Generic");
