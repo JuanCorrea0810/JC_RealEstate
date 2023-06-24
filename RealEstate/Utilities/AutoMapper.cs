@@ -11,7 +11,6 @@ using RealEstate.DTO_s.UsersDTO_s;
 using RealEstate.Models;
 using Microsoft.AspNetCore.Identity;
 using RealEstate.DTO_s.RolesDTO_s;
-using System.Security.Claims;
 
 namespace RealEstate.Utilities
 {

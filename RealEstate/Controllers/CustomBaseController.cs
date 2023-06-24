@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using Mailjet.Client.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstate.DTO_s.EstatesDTO_s;
 using RealEstate.Models;
-using RealEstate.Utilities;
 
 namespace RealEstate.Controllers
 {

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Mailjet.Client.Resources;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

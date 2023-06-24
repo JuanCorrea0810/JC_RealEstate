@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using RealEstate.DTO_s.RentersDTO_s;
 using RealEstate.Models;
 using RealEstate.Utilities;
-using System.Runtime.InteropServices;
 
 namespace RealEstate.Controllers
 {

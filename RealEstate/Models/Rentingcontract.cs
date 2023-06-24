@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RealEstate.Models
+﻿namespace RealEstate.Models
 {
     public partial class Rentingcontract
     {

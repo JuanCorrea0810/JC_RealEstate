@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RealEstate.DTO_s.UsersDTO_s;
+﻿using RealEstate.DTO_s.UsersDTO_s;
 
 namespace RealEstate.Utilities
 {

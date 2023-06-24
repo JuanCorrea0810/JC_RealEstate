@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using RealEstate.DTO_s.PaymentsDTO_s;
 using RealEstate.Models;
 using RealEstate.Utilities;
-using System.Diagnostics;
 
 namespace RealEstate.Controllers
 {

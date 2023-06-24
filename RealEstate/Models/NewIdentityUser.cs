@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using RealEstate.Validations;
 using System.ComponentModel.DataAnnotations;
 
 namespace RealEstate.Models
