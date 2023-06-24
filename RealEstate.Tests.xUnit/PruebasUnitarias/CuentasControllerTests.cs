@@ -1,16 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using PeliculasAPI.Tests;
 using RealEstate.Controllers;
 using RealEstate.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Moq;
-using RealEstate.Utilities.Auth;
 using RealEstate.Models.Auth;
 using RealEstate.Utilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -18,16 +11,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using RealEstate.DTO_s.UsersDTO_s;
+using FluentAssertions;
 
-namespace RealEstateTests.PruebasUnitarias
+namespace RealEstate.Tests.xUnit
 {
-    [TestClass]
+    
     public class CuentasControllerTests:BasePruebas
     {
-        [TestMethod]
+        [Fact]
         public async Task SeRegistraUsuario() 
         { 
             var nombreBD= Guid.NewGuid().ToString();
@@ -53,14 +46,15 @@ namespace RealEstateTests.PruebasUnitarias
             var ExisteUsuario = await context.Users.AnyAsync();
             var SeRegistraEnRolUser = await context2.UserRoles.AnyAsync();
             var SeAgregaClaimUser = await context2.UserClaims.AnyAsync();
-            Assert.IsNotNull(respuesta);
-            Assert.IsNotNull(respuesta.Token);
-            Assert.IsTrue(ExisteUsuario);
-            Assert.IsTrue(SeRegistraEnRolUser);
-            Assert.IsTrue(SeAgregaClaimUser);
+         
+            respuesta.Should().NotBeNull();
+            respuesta.Token.Should().NotBeNull();
+            ExisteUsuario.Should().BeTrue();
+            SeRegistraEnRolUser.Should().BeTrue();
+            SeAgregaClaimUser.Should().BeTrue();
         }
 
-        [TestMethod]
+        [Fact]
         public async Task SeIniciaSesion()
         {
             var nombreBD = Guid.NewGuid().ToString();
@@ -83,11 +77,11 @@ namespace RealEstateTests.PruebasUnitarias
 
             var respuesta = resultado.Value;
             
-            Assert.IsNotNull(respuesta);
-            Assert.IsNotNull(respuesta.Token);
-
+            respuesta.Should().NotBeNull();
+            respuesta.Token.Should().NotBeNull();
         }
-        [TestMethod]
+
+        [Fact]
         public async Task NoSePuedeIniciarSesionSiUsuarioEstáBloqueado()
         {
             var nombreBD = Guid.NewGuid().ToString();
@@ -115,11 +109,11 @@ namespace RealEstateTests.PruebasUnitarias
 
             var respuesta = resultado.Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400,respuesta.StatusCode);
-
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(400);
         }
-        [TestMethod]
+
+        [Fact]
         public async Task NoSePuedeIniciarSesionConDatosIncorrectos()
         {
             var nombreBD = Guid.NewGuid().ToString();
@@ -146,11 +140,12 @@ namespace RealEstateTests.PruebasUnitarias
 
             var respuesta = resultado.Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400, respuesta.StatusCode);
-            Assert.AreEqual("Datos Incorrectos. Vuelva a intentarlo.",respuesta.Value);
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(400);
+            respuesta.Value.Should().Be("Datos Incorrectos. Vuelva a intentarlo.");
         }
-        [TestMethod]
+
+        [Fact]
         public async Task MuestraMensajeDeAdvertenciaCuandoSoloQuedaUnIntentoDeInicioDeSesion()
         {
             var nombreBD = Guid.NewGuid().ToString();
@@ -177,11 +172,12 @@ namespace RealEstateTests.PruebasUnitarias
 
             var respuesta = resultado.Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400, respuesta.StatusCode);
-            Assert.AreEqual("Solo le queda un intento, si vuelve a fallar se bloqueará la cuenta temporalmente", respuesta.Value);
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(400);
+            respuesta.Value.Should().Be("Solo le queda un intento, si vuelve a fallar se bloqueará la cuenta temporalmente");
         }
-        [TestMethod]
+
+        [Fact]
         public async Task MuestraMensajeDeCuentaBloqueadaTemporalmente()
         {
 
@@ -209,11 +205,12 @@ namespace RealEstateTests.PruebasUnitarias
 
             var respuesta = resultado.Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400, respuesta.StatusCode);
-            Assert.AreEqual("Cuenta bloqueda temporalmente. Intente más tarde", respuesta.Value);
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(400);
+            respuesta.Value.Should().Be("Cuenta bloqueda temporalmente. Intente más tarde");
         }
-        [TestMethod]
+
+        [Fact]
         public async Task SeCompletaPerfil()
         {
 
@@ -246,7 +243,7 @@ namespace RealEstateTests.PruebasUnitarias
             });
             await context.SaveChangesAsync();
             var Usuario = (NewIdentityUser)await context.Users.FirstOrDefaultAsync();
-            Assert.IsNull(Usuario.Country);
+            Usuario.Country.Should().BeNull();
             var controller = ConstruirCuentasController(nombreBD);
 
             var dto = new PutUsersDTO() {
@@ -267,12 +264,13 @@ namespace RealEstateTests.PruebasUnitarias
             var context2 = ConstruirContext(nombreBD);
             var UsuarioActualizado = (NewIdentityUser)await context2.Users.FirstOrDefaultAsync();
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(200, respuesta.StatusCode);
-            Assert.IsNotNull(UsuarioActualizado.Country);
-            Assert.AreEqual(1098765431,UsuarioActualizado.Dni);
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(200);
+            UsuarioActualizado.Country.Should().NotBeNull();
+            UsuarioActualizado.Dni.Should().Be(1098765431);
         }
-        [TestMethod]
+
+        [Fact]
         public async Task SeCompletaPerfilSiElDniEsElMismo()
         {
 
@@ -334,13 +332,14 @@ namespace RealEstateTests.PruebasUnitarias
             var context2 = ConstruirContext(nombreBD);
             var UsuarioActualizado = (NewIdentityUser)await context2.Users.FirstOrDefaultAsync();
 
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(200, respuesta.StatusCode);
-            Assert.AreEqual("Argentina",UsuarioActualizado.Country);
-            Assert.AreEqual(1098765431, UsuarioActualizado.Dni);
-            Assert.AreEqual("0987654321",UsuarioActualizado.PhoneNumber);
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(200);
+            UsuarioActualizado.Country.Should().Be("Argentina");
+            UsuarioActualizado.Dni.Should().Be(1098765431);
+            UsuarioActualizado.PhoneNumber.Should().Be("0987654321");
         }
-        [TestMethod]
+
+        [Fact]
         public async Task NoDejaActualizarSiElDniLoTieneOtroUsuario()
         {
 
@@ -425,13 +424,12 @@ namespace RealEstateTests.PruebasUnitarias
             var resultado = await controller.CompleteProfile(dto);
 
             var respuesta = resultado as BadRequestObjectResult;
-            
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(400, respuesta.StatusCode);
-            Assert.AreEqual("DNI no aceptado", respuesta.Value);
-            
+                       
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(400);
+            respuesta.Value.Should().Be("DNI no aceptado");
         }
-        [TestMethod]
+        [Fact]
         public async Task CambiarPassword()
         {
 
@@ -465,16 +463,18 @@ namespace RealEstateTests.PruebasUnitarias
             var resultado = await controller.ChangePassword(dto);
 
             var respuesta = resultado as OkResult;
-            Assert.IsNotNull(respuesta);
-            Assert.AreEqual(200, respuesta.StatusCode);
+
+            respuesta.Should().NotBeNull();
+            respuesta.StatusCode.Should().Be(200);
 
             var Credentials = new LoginAuth() { Email = "juancorrear08102@gmail.com", Password = "Juancho0810!", RememberMe = true};
 
             var resultado2 = await controller.LogIn(Credentials);
             var respuesta2 = resultado2.Value;
-            Assert.IsNotNull(respuesta2);
-            Assert.IsNotNull(respuesta2.Token);
-            
+
+            respuesta2.Should().NotBeNull();
+            respuesta2.Token.Should().NotBeNull();
+
         }
 
         private async Task CrearUsuarioHelper(string nombreBD)
