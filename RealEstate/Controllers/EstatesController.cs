@@ -27,7 +27,7 @@ namespace RealEstate.Controllers
             this.mapper = mapper;
             this.getUser = getUser;
         }
-
+        
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Owner,Admin")]
         [HttpGet("ListOfEstates")]
         public async Task<ActionResult<List<GetEstatesDTO>>> GetAllEstates()

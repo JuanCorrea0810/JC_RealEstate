@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using RealEstate.Controllers;
 using RealEstate.Models;
-using Microsoft.AspNetCore.Http;
 using Moq;
 using RealEstate.Models.Auth;
 using RealEstate.Utilities;

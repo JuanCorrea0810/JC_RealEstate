@@ -1,22 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using RealEstate.Controllers;
 using RealEstate.Models;
 using RealEstate.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 
 namespace RealEstate.Tests.xUnit
 {
@@ -122,6 +115,45 @@ namespace RealEstate.Tests.xUnit
                 null);
         }
 
-        
+        //Pruebas de Integración
+        protected WebApplicationFactory<Startup> ConstruirWebApplicationFactory(string nombreDB, bool ignorarSeguridad = true) 
+        {
+            var factory = new WebApplicationFactory<Startup>();
+            factory = factory.WithWebHostBuilder(builder => 
+            {
+                builder.ConfigureTestServices(services => 
+                {
+                    //Remover el servicio que está inyectando la clase DbContext, esto es porque queremos usar un proveedor en memoria de EF
+                    // Y en la clase Startup se está inyectando es con un proveedor de base de datos completo.
+                    //Así que tenemos que eliminar ese servicio al momento de correr nuestras pruebas de integración.
+                    var descriptorDbContext = services.SingleOrDefault(x=> x.ServiceType == typeof(DbContextOptions<RealEstateProjectContext>));
+
+                    //Si no es nulo entonces removemos ese servicio
+                    if (descriptorDbContext != null)
+                    {
+                        services.Remove(descriptorDbContext);
+                    }
+
+                    //Ahora agregamos el proveedor en memoria a nuestra colección de servicios
+                    services.AddDbContext<RealEstateProjectContext>(options => options.UseInMemoryDatabase(nombreDB));
+
+                    //Si queremos saltar todos los filtros de autorización
+                    if (ignorarSeguridad)
+                    {
+                        //Se agrega un filtro de acción para que se ejecute antes y después de cada endpoint
+                        // Este filtro lo que hará es que proporcionará acceso a claims cuando se necesite información del usuario
+                        services.AddControllers(options => 
+                        {
+                            options.Filters.Add(new UsuarioFalso());
+                        });
+
+                        //Se agrega la funcionalidad que me permite saltarme todos lo filtros de autorización
+                        services.AddSingleton<IAuthorizationHandler,AuthorizationRequirements>();
+                    }
+                
+                });
+            });
+            return factory;
+        }
     }
 }

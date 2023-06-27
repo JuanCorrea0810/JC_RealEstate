@@ -13,12 +13,12 @@ using RealEstate.Utilities;
 
 namespace RealEstate.Tests.xUnit
 {
-    public class EstatesControllerTests:BasePruebas
+    public class EstatesControllerTests : BasePruebas
     {
         private IMapper mapper;
         private Mock<IGetUserInfo> mock;
 
-        
+
         public EstatesControllerTests()
         {
             mapper = ConfigurarAutoMapper();
@@ -26,12 +26,12 @@ namespace RealEstate.Tests.xUnit
             mock.Setup(x => x.GetId()).Returns(Task.FromResult("Usuario1"));
         }
         [Fact]
-        public async Task DevuelveTodasLasPropiedades() 
+        public async Task DevuelveTodasLasPropiedades()
         {
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
 
             context.Estates.Add(new Estate
             {
@@ -81,11 +81,11 @@ namespace RealEstate.Tests.xUnit
             await context.SaveChangesAsync();
 
             var context2 = ConstruirContext(nombreDB);
-            var controller = new EstatesController(context2,mapper,null);
+            var controller = new EstatesController(context2, mapper, null);
 
             //Prueba
             var resultado = await controller.GetAllEstates();
-                
+
             //Verificación
             var respuesta = resultado.Value;
 
@@ -94,15 +94,15 @@ namespace RealEstate.Tests.xUnit
         }
 
         [Fact]
-        public async Task DevuelveErrorSiElUsuarioNoTienePropiedades() 
+        public async Task DevuelveErrorSiElUsuarioNoTienePropiedades()
         {
 
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
 
-           
+
+
             var controller = new EstatesController(context, mapper, mock.Object);
 
             //Prueba
@@ -124,7 +124,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-           
+
 
             context.Estates.Add(new Estate
             {
@@ -193,7 +193,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             var controller = new EstatesController(context, mapper, mock.Object);
 
             //Prueba
@@ -214,7 +214,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -265,7 +265,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -282,7 +282,7 @@ namespace RealEstate.Tests.xUnit
             });
 
             await context.SaveChangesAsync();
-            
+
             var context2 = ConstruirContext(nombreDB);
             var controller = new EstatesController(context2, mapper, mock.Object);
 
@@ -303,7 +303,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -318,7 +318,7 @@ namespace RealEstate.Tests.xUnit
                 Sold = false
             });
             await context.SaveChangesAsync();
-            
+
             var context2 = ConstruirContext(nombreDB);
             var controller = new EstatesController(context2, mapper, mock.Object);
 
@@ -341,7 +341,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             var controller = new EstatesController(context, mapper, mock.Object);
             var dto = new PostEstatesDTO()
             {
@@ -375,7 +375,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
 
             context.Estates.Add(new Estate
             {
@@ -392,8 +392,8 @@ namespace RealEstate.Tests.xUnit
             });
 
             await context.SaveChangesAsync();
-            
-            
+
+
             var controller = new EstatesController(context, mapper, mock.Object);
             var dto = new PostEstatesDTO()
             {
@@ -430,7 +430,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             var controller = new EstatesController(context, mapper, mock.Object);
 
 
@@ -452,7 +452,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreDB = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreDB);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -468,7 +468,7 @@ namespace RealEstate.Tests.xUnit
             });
 
             await context.SaveChangesAsync();
-           
+
             var context2 = ConstruirContext(nombreDB);
 
             var controller = new EstatesController(context2, mapper, mock.Object);
@@ -480,7 +480,7 @@ namespace RealEstate.Tests.xUnit
             //Verificación
             var respuesta = resultado as OkObjectResult;
             var context3 = ConstruirContext(nombreDB);
-            var ExisteAlgunaPropiedad = await context3.Estates.AnyAsync(); 
+            var ExisteAlgunaPropiedad = await context3.Estates.AnyAsync();
 
             respuesta.Should().NotBeNull();
             ExisteAlgunaPropiedad.Should().BeFalse();
@@ -495,7 +495,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreBD = Guid.NewGuid().ToString();
             var contexto = ConstruirContext(nombreBD);
-            
+
 
             var controller = new EstatesController(contexto, mapper, mock.Object);
             var patchDoc = new JsonPatchDocument<PatchEstatesDTO>();
@@ -515,7 +515,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreBD = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreBD);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -531,17 +531,17 @@ namespace RealEstate.Tests.xUnit
                 Sold = false
             });
             await context.SaveChangesAsync();
-            
-           
+
+
             var context2 = ConstruirContext(nombreBD);
             var controller = new EstatesController(context2, mapper, mock.Object);
-            
+
             var patchDoc = new JsonPatchDocument<PatchEstatesDTO>();
             patchDoc.Operations.Add(new Operation<PatchEstatesDTO>("replace", "/Alias", null, "Casa 1"));
 
             //Prueba
             var respuesta = await controller.Patch(patchDoc, 1);
-           
+
             //Verificación
             var resultado = respuesta as BadRequestObjectResult;
 
@@ -555,7 +555,7 @@ namespace RealEstate.Tests.xUnit
             //Preparación
             var nombreBD = Guid.NewGuid().ToString();
             var context = ConstruirContext(nombreBD);
-            
+
             context.Estates.Add(new Estate
             {
                 IdUser = "Usuario1",
@@ -572,7 +572,7 @@ namespace RealEstate.Tests.xUnit
             });
             await context.SaveChangesAsync();
 
-            
+
             var context2 = ConstruirContext(nombreBD);
             var controller = new EstatesController(context2, mapper, mock.Object);
 

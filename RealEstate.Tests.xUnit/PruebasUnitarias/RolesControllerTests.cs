@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using FluentAssertions;
-using Moq;
 
 namespace RealEstate.Tests.xUnit
 {
